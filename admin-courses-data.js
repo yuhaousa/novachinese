@@ -9,11 +9,11 @@
   const saveButton = document.getElementById("admin-course-save");
   const resetButton = document.getElementById("admin-course-reset");
   const deleteButton = document.getElementById("admin-course-delete");
-  const createButton = document.getElementById("admin-create-course");
   const uploadButton = document.getElementById("admin-cover-upload");
   const coverFileInput = document.getElementById("course-cover-file");
   const coverPreview = document.getElementById("course-cover-preview");
   const formStatus = document.getElementById("admin-course-form-status");
+  const modeBadge = document.getElementById("admin-course-mode");
 
   if (!tableBody || !form) {
     return;
@@ -32,8 +32,6 @@
 
   let courses = [];
   let selectedSlug = "";
-  let mode = "edit";
-
   function escapeHtml(value) {
     return String(value)
       .replaceAll("&", "&amp;")
@@ -65,6 +63,15 @@
 
     coverPreview.removeAttribute("src");
     coverPreview.style.display = "none";
+  }
+
+  function setModeBadge(text, tone) {
+    if (!modeBadge) {
+      return;
+    }
+
+    modeBadge.textContent = text;
+    modeBadge.className = `admin-pill ${tone || "slate"}`;
   }
 
   function syncPreviewLink(course) {
@@ -141,19 +148,12 @@
     return courses.find((course) => course.slug === slug) || null;
   }
 
-  function toggleEditMode(editMode) {
-    mode = editMode ? "edit" : "create";
-    fields.slug.readOnly = editMode;
-    deleteButton.disabled = !editMode;
-
-    if (!editMode) {
-      syncCoverPreview("");
-      syncPreviewLink(null);
-      coverFileInput.value = "";
-      uploadButton.disabled = true;
-    } else {
-      uploadButton.disabled = false;
-    }
+  function applyEditMode() {
+    fields.slug.readOnly = true;
+    deleteButton.disabled = false;
+    saveButton.textContent = "保存到数据库";
+    setModeBadge("编辑模式", "slate");
+    uploadButton.disabled = false;
   }
 
   function fillForm(course) {
@@ -161,7 +161,7 @@
       return;
     }
 
-    toggleEditMode(true);
+    applyEditMode();
     selectedSlug = course.slug;
     fields.slug.value = course.slug;
     fields.title.value = course.title || "";
@@ -174,21 +174,6 @@
     syncPreviewLink(course);
     syncCoverPreview(course.coverImageUrl || "");
     renderRows(courses);
-  }
-
-  function blankCreateForm() {
-    toggleEditMode(false);
-    selectedSlug = "";
-    fields.slug.value = "";
-    fields.title.value = "";
-    fields.author.value = "";
-    fields.stage.value = "";
-    fields.genre.value = "";
-    fields.sourceType.value = "content-page";
-    fields.route.value = "";
-    fields.status.value = "published";
-    renderRows(courses);
-    setFormStatus("请输入新课程信息，然后保存。", "neutral");
   }
 
   async function loadCourses(preferredSlug) {
@@ -215,15 +200,8 @@
         courses[0] ||
         null;
 
-      if (mode === "create" && !preferredSlug) {
-        renderRows(courses);
-        return;
-      }
-
       if (nextCourse) {
         fillForm(nextCourse);
-      } else {
-        blankCreateForm();
       }
     } catch (error) {
       console.error("Failed to load admin courses:", error);
@@ -250,10 +228,6 @@
     }
   });
 
-  createButton.addEventListener("click", () => {
-    blankCreateForm();
-  });
-
   fields.sourceType.addEventListener("change", () => {
     if (fields.sourceType.value === "full-flow" && !fields.route.value.trim()) {
       fields.route.value = "/index.html";
@@ -263,12 +237,6 @@
       fields.sourceType.value === "content-page" &&
       (!fields.route.value.trim() || fields.route.value.trim() === "/index.html")
     ) {
-      fields.route.value = `/course-content.html?course=${fields.slug.value || "new-course"}`;
-    }
-  });
-
-  fields.slug.addEventListener("input", () => {
-    if (mode === "create" && fields.sourceType.value === "content-page") {
       fields.route.value = `/course-content.html?course=${fields.slug.value || "new-course"}`;
     }
   });
@@ -299,11 +267,7 @@
     setFormStatus(mode === "create" ? "正在创建课程..." : "正在保存到 D1...", "neutral");
 
     try {
-      const endpoint =
-        mode === "create"
-          ? "./api/admin/courses"
-          : `./api/admin/courses/${encodeURIComponent(selectedSlug)}`;
-      const response = await fetch(endpoint, {
+      const response = await fetch(`./api/admin/courses/${encodeURIComponent(selectedSlug)}`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -318,12 +282,7 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
-      setFormStatus(
-        mode === "create"
-          ? `《${result.item.title}》已创建。`
-          : `《${result.item.title}》已保存。`,
-        "success"
-      );
+      setFormStatus(`《${result.item.title}》已保存。`, "success");
       await loadCourses(result.item.slug);
     } catch (error) {
       console.error("Failed to save course:", error);
@@ -335,11 +294,6 @@
   });
 
   resetButton.addEventListener("click", () => {
-    if (mode === "create") {
-      blankCreateForm();
-      return;
-    }
-
     const course = getCourseBySlug(selectedSlug);
 
     if (course) {
@@ -349,7 +303,7 @@
   });
 
   deleteButton.addEventListener("click", async () => {
-    if (mode !== "edit" || !selectedSlug) {
+    if (!selectedSlug) {
       setFormStatus("请先选择要删除的课程。", "error");
       return;
     }
@@ -393,7 +347,7 @@
   });
 
   uploadButton.addEventListener("click", async () => {
-    if (mode !== "edit" || !selectedSlug) {
+    if (!selectedSlug) {
       setFormStatus("请先保存课程，再上传封面。", "error");
       return;
     }
@@ -433,5 +387,6 @@
     }
   });
 
-  loadCourses();
+  const initialCourse = new URLSearchParams(window.location.search).get("course");
+  loadCourses(initialCourse);
 })();

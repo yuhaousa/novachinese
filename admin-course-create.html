@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead Admin · 新建课程</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page">
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="admin-shell">
+        <section class="admin-hero animate-in">
+          <div class="admin-hero-copy">
+            <div class="admin-kicker">后台管理模式 · 新建课程</div>
+            <h1 class="admin-hero-title">创建一门新的课程入口</h1>
+            <p class="admin-hero-subtitle">这个页面只负责创建课程，不展示课程列表。创建成功后会自动跳回课程管理页，并选中新建课程继续编辑。</p>
+          </div>
+          <div class="admin-actions">
+            <a href="admin-courses.html" class="admin-btn admin-btn-primary">返回课程管理</a>
+            <a href="overview.html" class="admin-btn admin-btn-secondary">查看前台课程页</a>
+          </div>
+        </section>
+
+        <section class="admin-card animate-in" style="animation-delay:.06s">
+          <div class="admin-card-header">
+            <div>
+              <div class="admin-card-title">课程基础信息</div>
+              <div class="admin-card-desc">先创建课程基础配置。创建成功后，再回到课程管理页补充封面、状态和更细的入口设置。</div>
+            </div>
+            <span class="admin-pill amber">新建模式</span>
+          </div>
+
+          <form id="admin-course-create-form" class="admin-form">
+            <div class="admin-form-grid">
+              <label class="admin-field">
+                <span class="admin-field-label">课程标识</span>
+                <input id="create-course-slug" class="admin-input" type="text" placeholder="例如：lotus-2" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">课程标题</span>
+                <input id="create-course-title" class="admin-input" type="text" placeholder="例如：秋天的怀念" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">作者</span>
+                <input id="create-course-author" class="admin-input" type="text" placeholder="例如：史铁生" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">学段 / 分层</span>
+                <input id="create-course-stage" class="admin-input" type="text" placeholder="例如：初一" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">体裁</span>
+                <input id="create-course-genre" class="admin-input" type="text" placeholder="例如：回忆散文" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">页面类型</span>
+                <select id="create-course-source-type" class="admin-select">
+                  <option value="content-page">独立内容页</option>
+                  <option value="full-flow">完整学习流程</option>
+                </select>
+              </label>
+              <label class="admin-field admin-field-span-2">
+                <span class="admin-field-label">前台入口路由</span>
+                <input id="create-course-route" class="admin-input" type="text" value="/course-content.html?course=new-course" required />
+              </label>
+              <label class="admin-field">
+                <span class="admin-field-label">发布状态</span>
+                <select id="create-course-status" class="admin-select">
+                  <option value="published">已发布</option>
+                  <option value="draft">草稿</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="admin-form-status" id="admin-course-create-status" data-tone="neutral">填写完成后点击“创建课程”。</div>
+
+            <div class="admin-actions">
+              <button type="submit" class="admin-btn admin-btn-primary" id="admin-course-create-submit">创建课程</button>
+              <button type="button" class="admin-btn admin-btn-secondary" id="admin-course-create-reset">重置</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="admin-course-create.js"></script>
+<script src="admin-shell.js"></script>
+</body>
+</html>

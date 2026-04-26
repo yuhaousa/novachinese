@@ -24,7 +24,7 @@
   function getActiveId() {
     const path = location.pathname.split('/').pop() || 'admin.html';
     if (path === 'admin.html') return 'dashboard';
-    if (path === 'admin-courses.html') return 'courses';
+    if (path === 'admin-courses.html' || path === 'admin-course-create.html') return 'courses';
     if (path === 'admin-content.html') return 'content';
     if (path === 'admin-users.html') return 'users';
     if (path === 'admin-ai.html') return 'ai';
