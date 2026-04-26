@@ -1,7 +1,6 @@
 import { courses } from "./course-data.js";
 
 const courseSeedMap = new Map(courses.map((course) => [course.slug, course]));
-const courseSeedOrder = new Map(courses.map((course, index) => [course.slug, index]));
 const textEncoder = new TextEncoder();
 
 const ADMIN_COOKIE_NAME = "nova_admin_session";
@@ -461,18 +460,13 @@ async function getCourses(env) {
     const items = rows
       .map((row) => enrichCourse(row, "d1", blockMap.get(row.id)))
       .sort((left, right) => {
-        const leftIndex = courseSeedOrder.get(left.slug) ?? Number.MAX_SAFE_INTEGER;
-        const rightIndex = courseSeedOrder.get(right.slug) ?? Number.MAX_SAFE_INTEGER;
+        const createdComparison = String(right.createdAt || "").localeCompare(String(left.createdAt || ""));
 
-        if (leftIndex === rightIndex) {
-          if (leftIndex === Number.MAX_SAFE_INTEGER) {
-            return String(right.createdAt || "").localeCompare(String(left.createdAt || ""));
-          }
-
-          return left.title.localeCompare(right.title, "zh-CN");
+        if (createdComparison !== 0) {
+          return createdComparison;
         }
 
-        return leftIndex - rightIndex;
+        return left.title.localeCompare(right.title, "zh-CN");
       });
 
     return {
