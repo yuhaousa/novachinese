@@ -16,11 +16,11 @@
           <div class="admin-hero-copy">
             <div class="admin-kicker">后台管理模式 · 课程管理</div>
             <h1 class="admin-hero-title">统一维护课程目录、课程状态与学习流入口</h1>
-            <p class="admin-hero-subtitle">这里集中管理前台课程列表中的课程卡片、年级分类、封面视觉、课程状态，以及它们进入的是完整流程还是独立内容页。</p>
+            <p class="admin-hero-subtitle">这里集中管理前台课程列表中的课程卡片、学段分类、课程状态，以及它们进入的是完整学习流程还是独立内容页。当前版本已经接入 D1，可直接保存课程基础配置。</p>
           </div>
           <div class="admin-actions">
             <a href="overview.html" class="admin-btn admin-btn-primary">查看前台课程页</a>
-            <a href="course-content.html?course=back" class="admin-btn admin-btn-secondary">预览课程内容页</a>
+            <a href="course-content.html?course=back" class="admin-btn admin-btn-secondary" id="admin-course-preview">预览课程内容页</a>
           </div>
         </section>
 
@@ -31,10 +31,10 @@
               <span class="admin-filter">初一</span>
               <span class="admin-filter">初二</span>
               <span class="admin-filter">初三</span>
-              <span class="admin-filter">完整流程</span>
+              <span class="admin-filter">完整学习流程</span>
               <span class="admin-filter">独立内容页</span>
             </div>
-            <a href="#" class="admin-btn admin-btn-primary">新建课程</a>
+            <button type="button" class="admin-btn admin-btn-primary" disabled>新建课程（下一步）</button>
           </div>
           <div class="admin-note" id="admin-course-status">正在读取课程数据...</div>
           <div class="admin-table-wrap">
@@ -42,61 +42,17 @@
               <thead>
                 <tr>
                   <th>课程</th>
-                  <th>年级</th>
+                  <th>学段</th>
                   <th>体裁</th>
                   <th>页面类型</th>
                   <th>前台入口</th>
                   <th>状态</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody id="admin-course-rows">
                 <tr>
-                  <td>《荷塘月色》</td>
-                  <td>初二</td>
-                  <td>写景散文</td>
-                  <td>完整 5 页流程</td>
-                  <td>`index.html`</td>
-                  <td><span class="admin-pill green">已发布</span></td>
-                </tr>
-                <tr>
-                  <td>《背影》</td>
-                  <td>初一</td>
-                  <td>亲情散文</td>
-                  <td>独立内容页</td>
-                  <td>`course-content.html?course=back`</td>
-                  <td><span class="admin-pill blue">内容已接入</span></td>
-                </tr>
-                <tr>
-                  <td>《从百草园到三味书屋》</td>
-                  <td>初一</td>
-                  <td>回忆散文</td>
-                  <td>独立内容页</td>
-                  <td>`course-content.html?course=baicao`</td>
-                  <td><span class="admin-pill blue">内容已接入</span></td>
-                </tr>
-                <tr>
-                  <td>《紫藤萝瀑布》</td>
-                  <td>初一</td>
-                  <td>抒情散文</td>
-                  <td>独立内容页</td>
-                  <td>`course-content.html?course=wisteria`</td>
-                  <td><span class="admin-pill blue">内容已接入</span></td>
-                </tr>
-                <tr>
-                  <td>《春》</td>
-                  <td>初一</td>
-                  <td>写景散文</td>
-                  <td>独立内容页</td>
-                  <td>`course-content.html?course=spring`</td>
-                  <td><span class="admin-pill blue">内容已接入</span></td>
-                </tr>
-                <tr>
-                  <td>《济南的冬天》</td>
-                  <td>初一</td>
-                  <td>城市写景</td>
-                  <td>独立内容页</td>
-                  <td>`course-content.html?course=winter`</td>
-                  <td><span class="admin-pill blue">内容已接入</span></td>
+                  <td colspan="7">正在加载课程列表...</td>
                 </tr>
               </tbody>
             </table>
@@ -105,11 +61,71 @@
 
         <section class="admin-grid-2">
           <div class="admin-card animate-in" style="animation-delay:.1s">
+            <div class="admin-card-header">
+              <div>
+                <div class="admin-card-title">课程编辑器</div>
+                <div class="admin-card-desc">选择一门课程后，可直接修改课程标题、作者、学段、体裁、页面类型、入口路由和发布状态，并保存到 D1。</div>
+              </div>
+              <span class="admin-pill slate">已接 D1</span>
+            </div>
+
+            <form id="admin-course-form" class="admin-form">
+              <div class="admin-form-grid">
+                <label class="admin-field">
+                  <span class="admin-field-label">课程标识</span>
+                  <input id="course-slug" class="admin-input" type="text" readonly />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">课程标题</span>
+                  <input id="course-title" class="admin-input" type="text" required />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">作者</span>
+                  <input id="course-author" class="admin-input" type="text" required />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">学段 / 分层</span>
+                  <input id="course-stage" class="admin-input" type="text" required />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">体裁</span>
+                  <input id="course-genre" class="admin-input" type="text" required />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">页面类型</span>
+                  <select id="course-source-type" class="admin-select">
+                    <option value="content-page">独立内容页</option>
+                    <option value="full-flow">完整学习流程</option>
+                  </select>
+                </label>
+                <label class="admin-field admin-field-span-2">
+                  <span class="admin-field-label">前台入口路由</span>
+                  <input id="course-route" class="admin-input" type="text" required />
+                </label>
+                <label class="admin-field">
+                  <span class="admin-field-label">发布状态</span>
+                  <select id="course-status" class="admin-select">
+                    <option value="published">已发布</option>
+                    <option value="draft">草稿</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="admin-form-status" id="admin-course-form-status" data-tone="neutral">选择一门课程后即可开始编辑。</div>
+
+              <div class="admin-actions">
+                <button type="submit" class="admin-btn admin-btn-primary" id="admin-course-save">保存到数据库</button>
+                <button type="button" class="admin-btn admin-btn-secondary" id="admin-course-reset">重置表单</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.14s">
             <div class="admin-card-title">课程结构策略</div>
             <div class="admin-list">
               <div class="admin-list-item">
                 <div>
-                  <div class="admin-list-title">完整流程课程</div>
+                  <div class="admin-list-title">完整学习流程课程</div>
                   <div class="admin-list-desc">用于重点演示课程，至少包含首页、文本解析、情感曲线、仿写训练、AI 对话。</div>
                 </div>
                 <span class="admin-pill green" id="admin-full-flow-count">1 门</span>
@@ -129,10 +145,8 @@
                 <span class="admin-pill amber">规划中</span>
               </div>
             </div>
-          </div>
 
-          <div class="admin-card animate-in" style="animation-delay:.14s">
-            <div class="admin-card-title">课程运营动作</div>
+            <div class="admin-card-title admin-card-title-spaced">课程运营动作</div>
             <div class="admin-list">
               <div class="admin-list-item">
                 <div>

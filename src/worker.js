@@ -13,6 +13,81 @@ function json(data, init = {}) {
   });
 }
 
+function errorResponse(status, message, extra = {}) {
+  return json(
+    {
+      ok: false,
+      error: message,
+      ...extra
+    },
+    { status }
+  );
+}
+
+async function readJson(request) {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeRoute(route, slug, sourceType) {
+  const fallback =
+    sourceType === "full-flow"
+      ? "/index.html"
+      : `/course-content.html?course=${slug}`;
+  const trimmed = typeof route === "string" ? route.trim() : "";
+
+  if (!trimmed) {
+    return fallback;
+  }
+
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function normalizeAdminPayload(slug, body) {
+  if (!body || typeof body !== "object") {
+    return {
+      error: "Request body must be valid JSON."
+    };
+  }
+
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const author = typeof body.author === "string" ? body.author.trim() : "";
+  const stage = typeof body.stage === "string" ? body.stage.trim() : "";
+  const genre = typeof body.genre === "string" ? body.genre.trim() : "";
+  const sourceType =
+    body.sourceType === "full-flow" ? "full-flow" : "content-page";
+  const status = body.status === "draft" ? "draft" : "published";
+
+  if (!title) {
+    return { error: "Title is required." };
+  }
+
+  if (!author) {
+    return { error: "Author is required." };
+  }
+
+  if (!stage) {
+    return { error: "Stage is required." };
+  }
+
+  if (!genre) {
+    return { error: "Genre is required." };
+  }
+
+  return {
+    title,
+    author,
+    stage,
+    genre,
+    sourceType,
+    status,
+    route: normalizeRoute(body.route, slug, sourceType)
+  };
+}
+
 async function getDatabaseStatus(env) {
   if (!env.DB) {
     return {
@@ -104,14 +179,14 @@ async function getCourses(env) {
         (
           SELECT cp.route_path
           FROM course_pages cp
-          WHERE cp.course_id = c.id AND cp.is_published = 1
+          WHERE cp.course_id = c.id
           ORDER BY cp.sort_order ASC
           LIMIT 1
         ) AS route,
         (
           SELECT cp.page_type
           FROM course_pages cp
-          WHERE cp.course_id = c.id AND cp.is_published = 1
+          WHERE cp.course_id = c.id
           ORDER BY cp.sort_order ASC
           LIMIT 1
         ) AS primaryPageType
@@ -149,11 +224,134 @@ async function getCourses(env) {
   }
 }
 
+async function getCourseRecord(env, slug) {
+  if (!env.DB) {
+    return null;
+  }
+
+  const query = `
+    SELECT
+      c.id,
+      c.slug,
+      c.title,
+      c.author,
+      c.stage,
+      c.genre,
+      c.status,
+      (
+        SELECT cp.id
+        FROM course_pages cp
+        WHERE cp.course_id = c.id
+        ORDER BY cp.sort_order ASC
+        LIMIT 1
+      ) AS pageId,
+      (
+        SELECT cp.route_path
+        FROM course_pages cp
+        WHERE cp.course_id = c.id
+        ORDER BY cp.sort_order ASC
+        LIMIT 1
+      ) AS route,
+      (
+        SELECT cp.page_type
+        FROM course_pages cp
+        WHERE cp.course_id = c.id
+        ORDER BY cp.sort_order ASC
+        LIMIT 1
+      ) AS primaryPageType
+    FROM courses c
+    WHERE c.slug = ?
+    LIMIT 1
+  `;
+
+  return env.DB.prepare(query).bind(slug).first();
+}
+
+async function updateCourse(env, slug, payload) {
+  const course = await getCourseRecord(env, slug);
+
+  if (!course) {
+    return {
+      error: "Course not found.",
+      status: 404
+    };
+  }
+
+  const pageType = payload.sourceType === "full-flow" ? "landing" : "content";
+
+  await env.DB.prepare(
+    `
+      UPDATE courses
+      SET
+        title = ?,
+        author = ?,
+        stage = ?,
+        genre = ?,
+        status = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `
+  )
+    .bind(
+      payload.title,
+      payload.author,
+      payload.stage,
+      payload.genre,
+      payload.status,
+      course.id
+    )
+    .run();
+
+  if (course.pageId) {
+    await env.DB.prepare(
+      `
+        UPDATE course_pages
+        SET
+          page_type = ?,
+          route_path = ?,
+          is_published = 1,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `
+    )
+      .bind(pageType, payload.route, course.pageId)
+      .run();
+  } else {
+    const pageId = `page-${slug}-${Date.now().toString(36)}`;
+
+    await env.DB.prepare(
+      `
+        INSERT INTO course_pages (
+          id,
+          course_id,
+          page_type,
+          route_path,
+          sort_order,
+          is_published,
+          created_at,
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, 10, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `
+    )
+      .bind(pageId, course.id, pageType, payload.route)
+      .run();
+  }
+
+  const courseData = await getCourses(env);
+  const updated = courseData.items.find((item) => item.slug === slug) || null;
+
+  return {
+    item: updated
+  };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const pathname = url.pathname;
 
-    if (url.pathname === "/api/health") {
+    if (pathname === "/api/health") {
       return json({
         ok: true,
         service: "nova-chinese",
@@ -162,7 +360,7 @@ export default {
       });
     }
 
-    if (url.pathname === "/api/courses") {
+    if (pathname === "/api/courses") {
       const courseData = await getCourses(env);
 
       return json({
@@ -173,7 +371,52 @@ export default {
       });
     }
 
-    if (url.pathname === "/api/db/status") {
+    if (pathname === "/api/admin/courses") {
+      const courseData = await getCourses(env);
+
+      return json({
+        ok: true,
+        total: courseData.items.length,
+        dataSource: courseData.dataSource,
+        items: courseData.items
+      });
+    }
+
+    if (pathname.startsWith("/api/admin/courses/")) {
+      if (!env.DB) {
+        return errorResponse(503, "D1 is not configured for admin updates.");
+      }
+
+      const slug = decodeURIComponent(pathname.replace("/api/admin/courses/", "").trim());
+
+      if (!slug) {
+        return errorResponse(400, "Course slug is required.");
+      }
+
+      if (request.method !== "POST") {
+        return errorResponse(405, "Method not allowed.");
+      }
+
+      const body = await readJson(request);
+      const payload = normalizeAdminPayload(slug, body);
+
+      if (payload.error) {
+        return errorResponse(400, payload.error);
+      }
+
+      const result = await updateCourse(env, slug, payload);
+
+      if (result.error) {
+        return errorResponse(result.status || 500, result.error);
+      }
+
+      return json({
+        ok: true,
+        item: result.item
+      });
+    }
+
+    if (pathname === "/api/db/status") {
       const database = await getDatabaseStatus(env);
 
       return json({
