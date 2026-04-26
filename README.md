@@ -99,6 +99,38 @@ npm run cf:dev
 npm run cf:deploy
 ```
 
+## GitHub 自动部署
+
+仓库已经补好了 GitHub Actions 工作流：
+
+- `.github/workflows/deploy-worker.yml`
+  推送到 `main` 时自动部署 Worker
+- `.github/workflows/migrate-d1.yml`
+  在 GitHub Actions 里手动执行 D1 migration
+
+要启用自动部署，你只需要在 GitHub 仓库 `Settings > Secrets and variables > Actions` 里添加两个仓库级 secret：
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+其中：
+
+- `CLOUDFLARE_ACCOUNT_ID` 当前值就是 `437b1bdabc05d0305e7cad723ba38cde`
+- `CLOUDFLARE_API_TOKEN` 建议使用一个新的 Cloudflare API Token，而不是本地 Wrangler 登录态
+
+推荐给这个 token 的权限：
+
+- `Workers Scripts: Edit`
+- `Workers Routes: Edit`
+- `D1: Edit`
+- `Account Settings: Read`
+
+配完后，后续流程就是：
+
+1. 本地改代码
+2. `git push origin main`
+3. GitHub Actions 自动部署到 Cloudflare
+
 ## D1 数据库接入
 
 当前已经完成：
