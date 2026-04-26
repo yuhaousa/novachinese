@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead AI语文 · 设置</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .settings-shell { display: grid; grid-template-columns: 240px 1fr; gap: 24px; }
+  .settings-nav { background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); padding: 16px 12px; height: fit-content; position: sticky; top: 84px; }
+  .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 10px; font-size: 13.5px; color: var(--text-secondary); cursor: pointer; transition: all 0.18s; font-weight: 500; }
+  .settings-nav-item:hover { background: var(--bg-card-soft); color: var(--text-primary); }
+  .settings-nav-item.active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+  .settings-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .settings-main { display: flex; flex-direction: column; gap: 20px; }
+  .settings-section { background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); padding: 24px 28px 26px; scroll-margin-top: 80px; }
+  .settings-section-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .settings-section-desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px; }
+  .profile-row { display: flex; align-items: center; gap: 20px; padding-bottom: 22px; border-bottom: 1px solid var(--border-soft); margin-bottom: 22px; }
+  .profile-avatar-wrap { position: relative; }
+  .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #9d174d; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 32px; font-weight: 600; }
+  .profile-avatar-edit { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2px solid var(--bg-page); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); }
+  .profile-avatar-edit:hover { color: var(--color-primary); }
+  .profile-avatar-edit svg { width: 12px; height: 12px; }
+  .profile-info { flex: 1; }
+  .profile-name { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+  .profile-id { font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px; }
+  .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .profile-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; font-size: 11.5px; font-weight: 500; }
+  .profile-badge.vip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+  .profile-badge.grade { background: var(--color-primary-soft); color: var(--color-primary-dark); }
+  .profile-badge.school { background: var(--color-blue-soft); color: var(--color-blue); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+  .form-row { display: flex; flex-direction: column; gap: 6px; }
+  .form-row.full { grid-column: 1 / -1; }
+  .form-label { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+  .form-input { padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 10px; font-family: inherit; font-size: 13.5px; color: var(--text-primary); background: var(--bg-card-soft); transition: all 0.18s; }
+  .form-input:focus { outline: none; border-color: var(--color-primary); background: #fff; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08); }
+  .pref-list { display: flex; flex-direction: column; }
+  .pref-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border-soft); }
+  .pref-item:last-child { border-bottom: none; }
+  .pref-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+  .pref-icon.green { background: var(--color-primary-soft); color: var(--color-primary); }
+  .pref-icon.blue { background: var(--color-blue-soft); color: var(--color-blue); }
+  .pref-icon.purple { background: var(--color-purple-soft); color: var(--color-purple); }
+  .pref-icon.amber { background: #fef3c7; color: #d97706; }
+  .pref-icon.rose { background: #fee2e2; color: #dc2626; }
+  .pref-info { flex: 1; min-width: 0; }
+  .pref-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .pref-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .pref-control { flex-shrink: 0; }
+  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 12px; transition: background 0.25s; }
+  .toggle-slider::before { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.25s; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+  .toggle input:checked + .toggle-slider { background: var(--color-primary); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+  .segment { display: inline-flex; background: var(--bg-card-soft); border: 1px solid var(--border-soft); border-radius: 8px; padding: 3px; }
+  .segment-item { padding: 5px 14px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.18s; font-weight: 500; }
+  .segment-item.active { background: #fff; color: var(--color-primary); box-shadow: var(--shadow-sm); font-weight: 600; }
+  .slider-wrap { display: flex; align-items: center; gap: 12px; min-width: 200px; }
+  .slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--border-light); border-radius: 4px; outline: none; }
+  .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: var(--color-primary); border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); transition: transform 0.15s; }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+  .slider::-moz-range-thumb { width: 18px; height: 18px; background: var(--color-primary); border-radius: 50%; cursor: pointer; border: none; }
+  .slider-value { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--color-primary); min-width: 30px; text-align: right; }
+  .font-preview { padding: 12px 16px; background: var(--bg-card-soft); border-radius: 8px; font-family: var(--font-display); color: var(--text-primary); transition: font-size 0.2s; margin-top: 12px; }
+  .theme-options { display: flex; gap: 10px; }
+  .theme-swatch { width: 32px; height: 32px; border-radius: 10px; position: relative; transition: transform 0.15s; border: none; padding: 0; }
+  .theme-swatch:hover { transform: scale(1.1); }
+  .theme-swatch.active::after { content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700; }
+  .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .data-card { padding: 16px; background: var(--bg-card-soft); border-radius: 12px; border: 1px solid var(--border-soft); }
+  .data-card-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .data-card-value { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-primary); }
+  .data-card-value small { font-size: 12px; color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+  .btn-danger { background: #fff; color: #dc2626; border: 1px solid #fecaca; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; transition: all 0.18s; font-family: inherit; }
+  .btn-danger:hover { background: #fee2e2; border-color: #dc2626; }
+  .about-card { display: flex; align-items: center; gap: 18px; padding: 18px 20px; background: linear-gradient(135deg, #ecfdf5, #f0fdfa); border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.15); }
+  .about-logo { width: 56px; height: 56px; flex-shrink: 0; }
+  .about-info { flex: 1; }
+  .about-name { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text-primary); }
+  .about-version { font-size: 12px; color: var(--text-muted); margin: 2px 0 6px; }
+  .about-tagline { font-size: 12.5px; color: var(--text-secondary); }
+  .about-links { display: flex; gap: 16px; padding-top: 12px; flex-wrap: wrap; }
+  .about-link { font-size: 12.5px; color: var(--color-primary); cursor: pointer; }
+  .about-link:hover { text-decoration: underline; }
+  @media (max-width: 1100px) {
+    .settings-shell { grid-template-columns: 1fr; }
+    .settings-nav { position: static; }
+    .form-grid, .data-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="animate-in" style="margin-bottom:22px;">
+        <h1 class="page-title">设置<span class="accent">·</span>个性化</h1>
+        <p class="page-subtitle">让 NovaRead 更懂你的阅读节奏</p>
+      </div>
+      <div class="settings-shell">
+        <nav class="settings-nav animate-in" style="animation-delay:.05s">
+          <div class="settings-nav-item active" data-section="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>账号信息</div>
+          <div class="settings-nav-item" data-section="preference"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/></svg>阅读偏好</div>
+          <div class="settings-nav-item" data-section="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>AI 助手</div>
+          <div class="settings-nav-item" data-section="notification"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>通知与提醒</div>
+          <div class="settings-nav-item" data-section="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>隐私与数据</div>
+          <div class="settings-nav-item" data-section="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</div>
+        </nav>
+        <div class="settings-main">
+          <section class="settings-section animate-in" style="animation-delay:.1s" id="section-profile">
+            <div class="settings-section-title">账号信息</div>
+            <div class="settings-section-desc">这些信息会展示在你的个人主页上</div>
+            <div class="profile-row">
+              <div class="profile-avatar-wrap">
+                <div class="profile-avatar">林</div>
+                <button class="profile-avatar-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+              </div>
+              <div class="profile-info">
+                <div class="profile-name">林清宁</div>
+                <div class="profile-id">学号 ID · ST20260418</div>
+                <div class="profile-badges">
+                  <span class="profile-badge vip">⭐ 会员</span>
+                  <span class="profile-badge grade">高中一年级</span>
+                  <span class="profile-badge school">实验中学</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row"><label class="form-label">昵称</label><input class="form-input" type="text" value="林同学" /></div>
+              <div class="form-row"><label class="form-label">真实姓名</label><input class="form-input" type="text" value="林清宁" /></div>
+              <div class="form-row"><label class="form-label">邮箱</label><input class="form-input" type="email" value="lin@bamboo.edu" /></div>
+              <div class="form-row"><label class="form-label">手机号</label><input class="form-input" type="tel" value="138 **** 5821" /></div>
+              <div class="form-row"><label class="form-label">学校</label><input class="form-input" type="text" value="实验中学" /></div>
+              <div class="form-row"><label class="form-label">年级</label><input class="form-input" type="text" value="高中一年级" /></div>
+              <div class="form-row full"><label class="form-label">个人简介</label><input class="form-input" type="text" value="爱读散文，最近在啃《围城》" /></div>
+            </div>
+          </section>
+          <section class="settings-section animate-in" style="animation-delay:.15s" id="section-preference">
+            <div class="settings-section-title">阅读偏好</div>
+            <div class="settings-section-desc">调整阅读体验，让眼睛和心都更舒服</div>
+            <div class="pref-list">
+              <div class="pref-item">
+                <div class="pref-icon green">🔤</div>
+                <div class="pref-info"><div class="pref-name">正文字号</div><div class="pref-desc">影响所有课文与文档的阅读字号</div></div>
+                <div class="pref-control"><div class="slider-wrap"><input type="range" class="slider" min="14" max="22" value="16" id="font-size-slider" /><span class="slider-value" id="font-size-value">16<small style="font-size:10px;font-weight:400;">px</small></span></div></div>
+              </div>
+              <div class="pref-item" style="display:block;border-bottom:1px solid var(--border-soft);padding:16px 0;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                  <div class="pref-icon green">📖</div>
+                  <div class="pref-info"><div class="pref-name">字体偏好</div><div class="pref-desc">选择最适合你的中文字体</div></div>
+                  <div class="pref-control"><div class="segment"><div class="segment-item active">宋体</div><div class="segment-item">黑体</div><div class="segment-item">楷体</div></div></div>
+                </div>
+                <div class="font-preview" id="font-preview" style="font-size:16px;">月光如流水一般，静静地泻在这一片叶子和花上。</div>
+              </div>
+              <div class="pref-item">
+                <div class="pref-icon blue">🎨</div>
+                <div class="pref-info"><div class="pref-name">主题色</div><div class="pref-desc">主色调将影响按钮、链接、强调文字</div></div>
+                <div class="pref-control"><div class="theme-options"><button class="theme-swatch active" style="background:#10b981;"></button><button class="theme-swatch" style="background:#6366f1;"></button><button class="theme-swatch" style="background:#a78bfa;"></button><button class="theme-swatch" style="background:#0891b2;"></button><button class="theme-swatch" style="background:#dc2626;"></button></div></div>
+              </div>
+              <div class="pref-item"><div class="pref-icon purple">🌙</div><div class="pref-info"><div class="pref-name">深色模式</div><div class="pref-desc">夜间阅读时切换至深色界面</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon amber">🔊</div><div class="pref-info"><div class="pref-name">朗读语速</div><div class="pref-desc">AI 朗读课文时的播放速度</div></div><div class="pref-control"><div class="segment"><div class="segment-item">慢</div><div class="segment-item active">标准</div><div class="segment-item">快</div></div></div></div>
+              <div class="pref-item"><div class="pref-icon green">🪶</div><div class="pref-info"><div class="pref-name">自动保存仿写</div><div class="pref-desc">仿写过程中每 5 秒自动保存一次草稿</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+            </div>
+          </section>
+          <section class="settings-section animate-in" style="animation-delay:.2s" id="section-ai">
+            <div class="settings-section-title">AI 助手</div>
+            <div class="settings-section-desc">控制 AI 在学习过程中的参与方式</div>
+            <div class="pref-list">
+              <div class="pref-item"><div class="pref-icon purple">💬</div><div class="pref-info"><div class="pref-name">对话风格</div><div class="pref-desc">AI 回答的语气倾向</div></div><div class="pref-control"><div class="segment"><div class="segment-item">严谨学术</div><div class="segment-item active">温和老师</div><div class="segment-item">轻松同伴</div></div></div></div>
+              <div class="pref-item"><div class="pref-icon blue">📏</div><div class="pref-info"><div class="pref-name">回答详尽度</div><div class="pref-desc">从精炼要点到详细展开</div></div><div class="pref-control"><div class="segment"><div class="segment-item">精炼</div><div class="segment-item active">中等</div><div class="segment-item">详尽</div></div></div></div>
+              <div class="pref-item"><div class="pref-icon green">🪶</div><div class="pref-info"><div class="pref-name">仿写自动评分</div><div class="pref-desc">每次保存后 AI 自动给出综合评分</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon amber">💡</div><div class="pref-info"><div class="pref-name">主动伴学提问</div><div class="pref-desc">阅读时 AI 适时弹出引导问题</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon rose">🔁</div><div class="pref-info"><div class="pref-name">允许参考往期对话</div><div class="pref-desc">AI 会基于你过往的提问给出连贯回答</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+            </div>
+          </section>
+          <section class="settings-section animate-in" style="animation-delay:.25s" id="section-notification">
+            <div class="settings-section-title">通知与提醒</div>
+            <div class="settings-section-desc">控制何时、以何种方式收到提醒</div>
+            <div class="pref-list">
+              <div class="pref-item"><div class="pref-icon green">📚</div><div class="pref-info"><div class="pref-name">每日阅读提醒</div><div class="pref-desc">每天 19:30 提醒你完成今日阅读任务</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon blue">📝</div><div class="pref-info"><div class="pref-name">作业批阅通知</div><div class="pref-desc">老师批阅你的仿写后立即通知</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon purple">✨</div><div class="pref-info"><div class="pref-name">新课程上线</div><div class="pref-desc">有新的课文与赏析地图发布时通知</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon amber">📧</div><div class="pref-info"><div class="pref-name">学习周报邮件</div><div class="pref-desc">每周一收到一封专属于你的学习总结</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+            </div>
+          </section>
+          <section class="settings-section animate-in" style="animation-delay:.3s" id="section-privacy">
+            <div class="settings-section-title">隐私与数据</div>
+            <div class="settings-section-desc">你的学习数据归你所有</div>
+            <div class="data-grid" style="margin-bottom:22px;">
+              <div class="data-card"><div class="data-card-label">已学习课文</div><div class="data-card-value">12<small>篇</small></div></div>
+              <div class="data-card"><div class="data-card-label">仿写作品</div><div class="data-card-value">8<small>篇</small></div></div>
+              <div class="data-card"><div class="data-card-label">AI 对话轮次</div><div class="data-card-value">142<small>轮</small></div></div>
+            </div>
+            <div class="pref-list">
+              <div class="pref-item"><div class="pref-icon blue">📤</div><div class="pref-info"><div class="pref-name">导出我的全部数据</div><div class="pref-desc">将笔记、仿写、对话记录打包下载（.zip）</div></div><div class="pref-control"><button class="btn btn-outline" style="padding:8px 16px;">立即导出</button></div></div>
+              <div class="pref-item"><div class="pref-icon green">🤝</div><div class="pref-info"><div class="pref-name">允许用于产品改进</div><div class="pref-desc">匿名贡献你的使用数据，帮助我们做得更好</div></div><div class="pref-control"><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div></div>
+              <div class="pref-item"><div class="pref-icon amber">🗑️</div><div class="pref-info"><div class="pref-name">清除聊天历史</div><div class="pref-desc">删除所有 AI 对话记录，此操作不可撤销</div></div><div class="pref-control"><button class="btn-danger">清除</button></div></div>
+              <div class="pref-item"><div class="pref-icon rose">⚠️</div><div class="pref-info"><div class="pref-name">注销账号</div><div class="pref-desc">永久删除账号与所有数据</div></div><div class="pref-control"><button class="btn-danger">注销账号</button></div></div>
+            </div>
+          </section>
+          <section class="settings-section animate-in" style="animation-delay:.35s" id="section-about">
+            <div class="settings-section-title">关于</div>
+            <div class="settings-section-desc">关于 NovaRead</div>
+            <div class="about-card">
+              <div class="about-logo">
+                <svg viewBox="0 0 56 56" fill="none">
+                  <defs>
+                    <linearGradient id="about-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#6366f1"/>
+                      <stop offset="100%" stop-color="#10b981"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="56" height="56" rx="14" fill="url(#about-grad)" opacity="0.1"/>
+                  <path d="M14 44V12l28 32V12" stroke="url(#about-grad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <circle cx="42" cy="12" r="3" fill="#10b981"/>
+                  <circle cx="14" cy="44" r="3" fill="#6366f1"/>
+                </svg>
+              </div>
+              <div class="about-info">
+                <div class="about-name">NovaRead AI 语文</div>
+                <div class="about-version">v 2.7.0 · BambooCloud Education</div>
+                <div class="about-tagline">让每一次阅读都有回响。</div>
+              </div>
+            </div>
+            <div class="about-links">
+              <span class="about-link">使用指南</span>
+              <span class="about-link">服务条款</span>
+              <span class="about-link">隐私政策</span>
+              <span class="about-link">意见反馈</span>
+              <span class="about-link">联系我们</span>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="shell.js"></script>
+<script src="page-behaviors.js"></script>
+</body>
+</html>

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>《荷塘月色》· 精读与意境还原</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* 头部 */
+  .reading-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .reading-head-title { flex: 1; }
+
+  /* 顶部双栏：原文 + 意境图 */
+  .reading-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  /* 原文阅读 */
+  .reading-card { padding: 22px 26px 24px; }
+  .reading-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .reading-toolbar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .reading-toolbar-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+  .font-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .font-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-right: 8px;
+  }
+  .font-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .font-btn:hover { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary-light); }
+
+  .paragraph {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px 14px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    transition: background 0.2s;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .paragraph:hover { background: var(--bg-card-soft); }
+  .paragraph.active {
+    background: var(--color-primary-soft);
+    border-left-color: var(--color-primary);
+  }
+  .paragraph-text {
+    flex: 1;
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+  }
+  .paragraph-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .tag.info { background: var(--color-blue-soft); color: var(--color-blue); }
+  .tag.purple { background: var(--color-purple-soft); color: var(--color-purple); }
+  .tag.green { background: var(--color-primary-soft); color: var(--color-primary); }
+  .tag.current {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  /* 意境还原 */
+  .scene-card { padding: 22px 26px 24px; }
+  .scene-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .scene-toolbar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .scene-toolbar-title svg { width: 18px; height: 18px; color: var(--color-accent); }
+
+  .scene-tabs { display: flex; gap: 4px; }
+  .scene-tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-weight: 500;
+  }
+  .scene-tab.active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+  .scene-tab:not(.active):hover { background: var(--bg-card-soft); }
+
+  /* 意境图 */
+  .scene-image {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 16px;
+    isolation: isolate;
+    background: linear-gradient(180deg, #1e3a5f 0%, #0f2541 60%, #061528 100%);
+  }
+  .scene-image-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .scene-moon-2 {
+    position: absolute;
+    top: 36px;
+    left: 38%;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff8d6, #fde68a 60%, #fcd34d);
+    box-shadow: 0 0 50px rgba(253, 230, 138, 0.6), 0 0 100px rgba(253, 230, 138, 0.3);
+  }
+  .scene-clouds {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80px 16px at 20% 24%, rgba(255,255,255,0.18), transparent),
+      radial-gradient(ellipse 100px 18px at 65% 32%, rgba(255,255,255,0.14), transparent),
+      radial-gradient(ellipse 60px 12px at 85% 22%, rgba(255,255,255,0.16), transparent);
+  }
+  .scene-water {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 65%;
+    background: linear-gradient(180deg, rgba(15, 30, 54, 0.4) 0%, rgba(8, 18, 36, 0.95) 100%);
+    overflow: hidden;
+  }
+  .scene-water::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg,
+        transparent 0px, transparent 12px,
+        rgba(253, 230, 138, 0.08) 12px, rgba(253, 230, 138, 0.08) 13px);
+  }
+  /* 月光倒影 */
+  .scene-reflection {
+    position: absolute;
+    bottom: 0;
+    left: 38%;
+    transform: translateX(35px);
+    width: 60px;
+    height: 130px;
+    background: linear-gradient(180deg, rgba(253, 230, 138, 0.5), rgba(253, 230, 138, 0));
+    filter: blur(6px);
+    border-radius: 50%;
+  }
+  /* 凉亭 */
+  .scene-pavilion {
+    position: absolute;
+    top: 36%;
+    right: 8%;
+    width: 90px;
+    height: 70px;
+  }
+  /* 荷叶 */
+  .scene-lotus {
+    position: absolute;
+    bottom: 6%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding: 0 20px;
+    pointer-events: none;
+  }
+  .scene-lotus span {
+    font-size: 24px;
+    filter: brightness(0.85) hue-rotate(-10deg);
+    animation: float 4s ease-in-out infinite;
+  }
+  .scene-lotus span:nth-child(1) { animation-delay: 0s; }
+  .scene-lotus span:nth-child(2) { animation-delay: 0.5s; font-size: 32px; }
+  .scene-lotus span:nth-child(3) { animation-delay: 1s; }
+  .scene-lotus span:nth-child(4) { animation-delay: 1.5s; font-size: 28px; }
+  .scene-lotus span:nth-child(5) { animation-delay: 2s; }
+
+  .scene-play {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .scene-play:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+
+  /* 关键词标签 */
+  .scene-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .keyword-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .keyword-chip:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-color: var(--color-primary-light);
+    transform: translateY(-1px);
+  }
+
+  /* 本段理解 */
+  .understand-card { padding: 22px 26px 24px; margin-bottom: 18px; }
+  .understand-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 18px;
+  }
+  .understand-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .understand-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .u-card {
+    padding: 18px 18px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    position: relative;
+    overflow: hidden;
+    min-height: 145px;
+  }
+  .u-card.green { background: linear-gradient(135deg, #ecfdf5, #fff); }
+  .u-card.purple { background: linear-gradient(135deg, #f5f3ff, #fff); }
+  .u-card.blue { background: linear-gradient(135deg, #eff6ff, #fff); }
+  .u-card.teal { background: linear-gradient(135deg, #f0fdfa, #fff); }
+
+  .u-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .u-head svg { width: 16px; height: 16px; }
+  .u-card.green .u-head svg { color: var(--color-primary); }
+  .u-card.purple .u-head svg { color: var(--color-purple); }
+  .u-card.blue .u-head svg { color: var(--color-blue); }
+  .u-card.teal .u-head svg { color: #14b8a6; }
+
+  .u-list {
+    list-style: none;
+    padding: 0;
+  }
+  .u-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 3px 0 3px 16px;
+    position: relative;
+    line-height: 1.7;
+  }
+  .u-list li::before {
+    content: '•';
+    position: absolute;
+    left: 4px;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+  .u-card.purple .u-list li::before { color: var(--color-purple); }
+  .u-card.blue .u-list li::before { color: var(--color-blue); }
+  .u-card.teal .u-list li::before { color: #14b8a6; }
+
+  .u-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .u-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .u-text em {
+    color: var(--color-primary);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .u-card.blue .u-text em { color: var(--color-blue); }
+
+  .u-decoration {
+    position: absolute;
+    bottom: -12px;
+    right: -8px;
+    font-size: 50px;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  /* AI 伴学提问 */
+  .ai-companion {
+    padding: 18px 24px;
+  }
+  .ai-companion-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .ai-companion-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .ai-companion-label svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .question-chips {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+  .question-chip {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .question-chip:hover {
+    background: #fff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .question-chip-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .qci-1 { color: var(--color-primary); }
+  .qci-2 { color: var(--color-purple); }
+  .qci-3 { color: var(--color-blue); }
+
+  .question-chip-text {
+    flex: 1;
+    text-align: left;
+  }
+  .question-chip svg.arrow {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+  }
+  .question-chip:hover svg.arrow { color: var(--color-primary); }
+
+  @media (max-width: 1100px) {
+    .reading-row { grid-template-columns: 1fr; }
+    .understand-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+
+      <div class="page-head animate-in">
+        <div class="breadcrumb">
+          <a href="index.html">文本解析</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <span>《荷塘月色》</span>
+        </div>
+        <div class="reading-head">
+          <div class="reading-head-title">
+            <h1 class="page-title">《荷塘月色》<span class="accent">·</span>精读与意境还原</h1>
+          </div>
+          <button class="btn btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            加入我的笔记
+          </button>
+        </div>
+      </div>
+
+      <!-- 顶部双栏 -->
+      <section class="reading-row">
+        <!-- 原文 -->
+        <div class="card reading-card animate-in" style="animation-delay:.05s">
+          <div class="reading-toolbar">
+            <div class="reading-toolbar-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              原文阅读
+            </div>
+            <div class="font-control">
+              <span class="font-label">字体</span>
+              <button class="font-btn">A-</button>
+              <button class="font-btn">A+</button>
+            </div>
+          </div>
+
+          <div class="paragraph">
+            <div class="paragraph-text">这几天心里颇不宁静。今晚在院里坐着乘凉，忽然想起日日走过的荷塘，在这满月的光里，总该另有一番样子吧。</div>
+            <div class="paragraph-tags">
+              <span class="tag info">情景交融</span>
+            </div>
+          </div>
+
+          <div class="paragraph">
+            <div class="paragraph-text">沿着荷塘，是一条曲折的小煤屑路。路上只我一个人，背着手，踱着。</div>
+            <div class="paragraph-tags">
+              <span class="tag info">写实铺垫</span>
+            </div>
+          </div>
+
+          <div class="paragraph active">
+            <div class="paragraph-text">月光如流水一般，静静地泻在这一片叶子和花上。叶子和花仿佛在牛乳中洗过一样；又像笼着轻纱的梦。</div>
+            <div class="paragraph-tags">
+              <span class="tag current">当前段落</span>
+              <span class="tag info">比喻</span>
+              <span class="tag purple">通感</span>
+            </div>
+          </div>
+
+          <div class="paragraph">
+            <div class="paragraph-text">树色一例是阴阴的，乍看像一团烟雾；但杨柳的丰姿，便在烟雾里也辨得出。</div>
+            <div class="paragraph-tags">
+              <span class="tag info">比喻</span>
+            </div>
+          </div>
+
+          <div class="paragraph">
+            <div class="paragraph-text">我且受用这无边的荷香月色好了。</div>
+            <div class="paragraph-tags">
+              <span class="tag info">情景交融</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 意境还原 -->
+        <div class="card scene-card animate-in" style="animation-delay:.1s">
+          <div class="scene-toolbar">
+            <div class="scene-toolbar-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+              AI意境还原
+            </div>
+            <div class="scene-tabs">
+              <span class="scene-tab active">原文场景</span>
+              <span class="scene-tab">镜头漫游</span>
+              <span class="scene-tab">意境关键词</span>
+            </div>
+          </div>
+
+          <div class="scene-image">
+            <!-- 远山 + 水面 + 凉亭 + 荷塘 -->
+            <svg class="scene-image-canvas" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e3a5f"/>
+                  <stop offset="100%" stop-color="#0f2541"/>
+                </linearGradient>
+              </defs>
+              <rect width="600" height="200" fill="url(#sky)"/>
+              <!-- 远山 -->
+              <path d="M0,150 Q120,110 220,130 T420,120 T600,135 L600,200 L0,200 Z" fill="#0a1830" opacity="0.7"/>
+              <path d="M0,170 Q150,140 320,155 T600,150 L600,200 L0,200 Z" fill="#06101e" opacity="0.85"/>
+              <!-- 远处灯光 -->
+              <circle cx="120" cy="148" r="1.5" fill="#fef3c7" opacity="0.7"/>
+              <circle cx="180" cy="155" r="1.2" fill="#fef3c7" opacity="0.5"/>
+              <circle cx="280" cy="143" r="1.4" fill="#fef3c7" opacity="0.6"/>
+              <circle cx="540" cy="148" r="1.3" fill="#fef3c7" opacity="0.5"/>
+              <!-- 萤火虫点点 -->
+              <circle cx="80"  cy="80"  r="1" fill="#fef9c3" opacity="0.7"/>
+              <circle cx="160" cy="60"  r="1" fill="#fef9c3" opacity="0.8"/>
+              <circle cx="500" cy="70"  r="1" fill="#fef9c3" opacity="0.6"/>
+              <circle cx="420" cy="40"  r="1" fill="#fef9c3" opacity="0.7"/>
+              <circle cx="60"  cy="120" r="1" fill="#fef9c3" opacity="0.5"/>
+            </svg>
+            <div class="scene-clouds"></div>
+            <div class="scene-moon-2"></div>
+
+            <!-- 凉亭 SVG -->
+            <svg class="scene-pavilion" viewBox="0 0 90 70" fill="none">
+              <!-- 屋顶 -->
+              <path d="M10 30 L45 8 L80 30 Z" fill="#1a1a2e" opacity="0.85"/>
+              <path d="M10 30 L45 12 L80 30" stroke="#fde68a" stroke-width="0.5" opacity="0.4" fill="none"/>
+              <!-- 屋身 -->
+              <rect x="20" y="30" width="50" height="32" fill="#1a1a2e" opacity="0.85"/>
+              <!-- 柱子 -->
+              <line x1="25" y1="30" x2="25" y2="62" stroke="#fde68a" stroke-width="0.8" opacity="0.5"/>
+              <line x1="65" y1="30" x2="65" y2="62" stroke="#fde68a" stroke-width="0.8" opacity="0.5"/>
+              <!-- 灯光 -->
+              <rect x="32" y="38" width="26" height="14" fill="#fef3c7" opacity="0.4" rx="2"/>
+              <rect x="36" y="42" width="18" height="6" fill="#fef9c3" opacity="0.7"/>
+            </svg>
+
+            <div class="scene-water"></div>
+            <div class="scene-reflection"></div>
+
+            <div class="scene-lotus">
+              <span>🪷</span>
+              <span>🪷</span>
+              <span>🪷</span>
+              <span>🪷</span>
+              <span>🪷</span>
+            </div>
+
+            <button class="scene-play" aria-label="播放">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg>
+            </button>
+          </div>
+
+          <div class="scene-keywords">
+            <span class="keyword-chip">🌙 月色</span>
+            <span class="keyword-chip">🪷 荷叶</span>
+            <span class="keyword-chip">☁️ 朦胧</span>
+            <span class="keyword-chip">〰️ 宁静</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 本段理解 -->
+      <section class="card understand-card animate-in" style="animation-delay:.15s">
+        <div class="understand-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          本段理解
+        </div>
+        <div class="understand-grid">
+          <div class="u-card green">
+            <div class="u-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/></svg>
+              写景对象
+            </div>
+            <ul class="u-list">
+              <li>月光</li>
+              <li>荷叶</li>
+              <li>荷花</li>
+              <li>树影</li>
+            </ul>
+            <div class="u-decoration">🪷</div>
+          </div>
+
+          <div class="u-card purple">
+            <div class="u-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+              表达手法
+            </div>
+            <ul class="u-list">
+              <li>比喻</li>
+              <li>通感</li>
+              <li>叠词</li>
+            </ul>
+            <div class="u-decoration">🎴</div>
+          </div>
+
+          <div class="u-card blue">
+            <div class="u-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              情感提示
+            </div>
+            <div class="u-text">
+              本段通过对月色与荷塘景物的描写，营造出静谧、朦胧的氛围，流露出<em>宁静中带淡淡惆怅</em>的情感。
+            </div>
+            <div class="u-decoration">💙</div>
+          </div>
+
+          <div class="u-card teal">
+            <div class="u-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+              AI导学
+            </div>
+            <div class="u-text">
+              作者为什么反复写"静"？<br/>结合本段内容，思考"静"在文章中的作用。
+            </div>
+            <div class="u-decoration">💭</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI 伴学提问 -->
+      <section class="card ai-companion animate-in" style="animation-delay:.2s">
+        <div class="ai-companion-row">
+          <div class="ai-companion-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            AI伴学提问
+          </div>
+          <div class="question-chips">
+            <button class="question-chip">
+              <span class="question-chip-icon qci-1">💬</span>
+              <span class="question-chip-text">这段为何动静结合？</span>
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="question-chip">
+              <span class="question-chip-icon qci-2">📖</span>
+              <span class="question-chip-text">什么是通感？</span>
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button class="question-chip">
+              <span class="question-chip-icon qci-3">😊</span>
+              <span class="question-chip-text">帮我总结本段主旨</span>
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<script src="shell.js"></script>
+</body>
+</html>

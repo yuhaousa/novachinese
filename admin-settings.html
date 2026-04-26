@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead Admin · 后台设置</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page">
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="admin-shell">
+        <section class="admin-hero animate-in">
+          <div class="admin-hero-copy">
+            <div class="admin-kicker">后台管理模式 · 后台设置</div>
+            <h1 class="admin-hero-title">权限、发布、日志和管理台运行规则</h1>
+            <p class="admin-hero-subtitle">后台设置页聚合角色权限、发布说明、日志留痕和后续接入真实后台时需要补充的基础治理能力。</p>
+          </div>
+        </section>
+
+        <section class="admin-grid-3">
+          <div class="admin-card animate-in" style="animation-delay:.05s">
+            <div class="admin-card-title">角色权限</div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">超级管理员</div>
+                  <div class="admin-list-desc">管理所有页面、课程状态、AI 策略和发布入口。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">教研编辑</div>
+                  <div class="admin-list-desc">维护课程文案、名句、任务、学习目标与课程标签。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">班级教师</div>
+                  <div class="admin-list-desc">查看班级进度、风险提醒和学生完成情况，不可改课程结构。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.09s">
+            <div class="admin-card-title">发布规则</div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">课程上线前</div>
+                  <div class="admin-list-desc">必须完成课程概览、至少 1 条名句、3 条任务和课程头图。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">完整流程课程</div>
+                  <div class="admin-list-desc">需额外校验文本解析页、情感曲线页、仿写页和 AI 对话页跳转。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">灰度发布</div>
+                  <div class="admin-list-desc">优先对指定班级开放，确认完成率和交互稳定后再全量展示。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.13s">
+            <div class="admin-card-title">系统说明</div>
+            <div class="admin-note">当前管理端仍是静态演示模式，没有真实登录态、权限校验、数据库和审计日志。要进入生产，需要先补登录体系、角色控制、内容版本和发布流水线。</div>
+          </div>
+        </section>
+
+        <section class="admin-card animate-in" style="animation-delay:.17s">
+          <div class="admin-card-title">后台日志示例</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>操作者</th>
+                  <th>页面</th>
+                  <th>动作</th>
+                  <th>结果</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-04-26 10:14</td>
+                  <td>admin</td>
+                  <td>课程管理</td>
+                  <td>新增后台管理模式页面组</td>
+                  <td><span class="admin-pill green">成功</span></td>
+                </tr>
+                <tr>
+                  <td>2026-04-26 10:27</td>
+                  <td>content_ops</td>
+                  <td>内容中心</td>
+                  <td>补充《岳阳楼记》内容页字段</td>
+                  <td><span class="admin-pill green">成功</span></td>
+                </tr>
+                <tr>
+                  <td>2026-04-26 10:33</td>
+                  <td>ai_editor</td>
+                  <td>AI策略</td>
+                  <td>调整仿写评分灰度开关</td>
+                  <td><span class="admin-pill amber">待上线</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="admin-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead Admin · 管理看板</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page">
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="admin-shell">
+        <section class="admin-hero animate-in">
+          <div class="admin-hero-copy">
+            <div class="admin-kicker">后台管理模式 · 总览</div>
+            <h1 class="admin-hero-title">课程站点、内容生产和 AI 运营统一收口</h1>
+            <p class="admin-hero-subtitle">这里用于管理课程目录、课程内容页、学生班级、AI 问答策略和后台权限。当前版本先提供静态管理端页面，用于演示后台结构和主要工作台。</p>
+            <div class="admin-chip-row">
+              <span class="admin-chip">课程总数 10</span>
+              <span class="admin-chip">独立课程内容页 9</span>
+              <span class="admin-chip">完整多页流程课程 1</span>
+            </div>
+          </div>
+          <div class="admin-actions">
+            <a href="admin-courses.html" class="admin-btn admin-btn-primary">管理课程</a>
+            <a href="admin-content.html" class="admin-btn admin-btn-secondary">查看内容中心</a>
+          </div>
+        </section>
+
+        <section class="admin-grid-4">
+          <div class="admin-card animate-in" style="animation-delay:.05s">
+            <div class="admin-stat-value">10</div>
+            <div class="admin-stat-label">课程目录</div>
+            <div class="admin-stat-desc">当前前台课程列表已展示 10 门课程，后台可继续扩充年级与专题结构。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.08s">
+            <div class="admin-stat-value">9</div>
+            <div class="admin-stat-label">独立内容页</div>
+            <div class="admin-stat-desc">除《荷塘月色》外，其余 9 门课程已接入独立内容详情页。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.11s">
+            <div class="admin-stat-value">128</div>
+            <div class="admin-stat-label">模拟活跃学生</div>
+            <div class="admin-stat-desc">按 4 个班级、每班 32 人进行演示，便于展示班级管理与任务分发。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.14s">
+            <div class="admin-stat-value">6</div>
+            <div class="admin-stat-label">后台页面</div>
+            <div class="admin-stat-desc">管理看板、课程管理、内容中心、用户班级、AI 策略、后台设置。</div>
+          </div>
+        </section>
+
+        <section class="admin-grid-2">
+          <div class="admin-card animate-in" style="animation-delay:.18s">
+            <div class="admin-card-header">
+              <div class="admin-card-title">待处理事项</div>
+              <span class="admin-pill amber">本周重点</span>
+            </div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">补齐 9 门课程的深层学习页</div>
+                  <div class="admin-list-desc">当前 9 门课程已有独立内容页，下一步可继续扩展文本解析、情感曲线、仿写训练等子页面。</div>
+                </div>
+                <span class="admin-pill rose">高优先级</span>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">课程封面统一管理</div>
+                  <div class="admin-list-desc">将课程卡片插画、Hero 图和课程内容头图统一归档，便于后续更换素材。</div>
+                </div>
+                <span class="admin-pill blue">设计</span>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">AI 对话提示词分层</div>
+                  <div class="admin-list-desc">按作者对谈、阅读指导、仿写点评 3 条策略线拆分配置。</div>
+                </div>
+                <span class="admin-pill green">AI</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.22s">
+            <div class="admin-card-header">
+              <div class="admin-card-title">近期发布记录</div>
+              <span class="admin-pill slate">最近 7 天</span>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>日期</th>
+                    <th>模块</th>
+                    <th>变更内容</th>
+                    <th>状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>04-26</td>
+                    <td>课程站点</td>
+                    <td>补充 9 门课程内容页</td>
+                    <td><span class="admin-pill green">已上线</span></td>
+                  </tr>
+                  <tr>
+                    <td>04-26</td>
+                    <td>课程目录</td>
+                    <td>课程封面升级为插画式视觉</td>
+                    <td><span class="admin-pill green">已上线</span></td>
+                  </tr>
+                  <tr>
+                    <td>04-25</td>
+                    <td>管理端</td>
+                    <td>后台管理模式页面组初始化</td>
+                    <td><span class="admin-pill amber">演示版</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-grid-3">
+          <div class="admin-card animate-in" style="animation-delay:.26s">
+            <div class="admin-card-title">课程运营概览</div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初一课程</div>
+                  <div class="admin-list-desc">5 门，偏写景与回忆类文本，适合做基础阅读训练。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初二课程</div>
+                  <div class="admin-list-desc">4 门，兼顾散文、小说与文言文，适合结构与主题训练。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初三课程</div>
+                  <div class="admin-list-desc">1 门，聚焦古文名篇与议论抒情结合。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.29s">
+            <div class="admin-card-title">风险提示</div>
+            <div class="admin-note">当前后台管理为静态演示页，尚未连接真实数据库、权限系统和内容发布流水线。后续若要进入生产，需要补充认证、角色、审计和内容版本管理。</div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.32s">
+            <div class="admin-card-title">快捷入口</div>
+            <div class="admin-list">
+              <a href="admin-courses.html" class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">课程管理</div>
+                  <div class="admin-list-desc">维护课程目录、封面、年级和状态。</div>
+                </div>
+              </a>
+              <a href="admin-users.html" class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">用户班级</div>
+                  <div class="admin-list-desc">查看班级、活跃度、作业完成与风险学生。</div>
+                </div>
+              </a>
+              <a href="admin-ai.html" class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">AI 策略</div>
+                  <div class="admin-list-desc">管理对话风格、评分规则与知识源开关。</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="admin-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead AI语文 · 课程内容</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .course-detail-page {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(16, 185, 129, 0.08) 0%, transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 22%),
+      linear-gradient(180deg, #f7fafc 0%, #f3f6fb 100%);
+  }
+
+  .detail-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .detail-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-2xl);
+    min-height: 360px;
+    background: linear-gradient(135deg, #10243d 0%, #173b5f 50%, #135d59 100%);
+    box-shadow: var(--shadow-lg);
+    isolation: isolate;
+  }
+
+  .detail-hero-scene {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .detail-hero-scene svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .detail-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(7, 14, 26, 0.78) 0%, rgba(7, 14, 26, 0.45) 42%, rgba(7, 14, 26, 0.16) 100%),
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.18));
+    z-index: -1;
+  }
+
+  .detail-hero-body {
+    position: relative;
+    padding: 34px 38px 36px;
+    max-width: 760px;
+    color: #fff;
+  }
+
+  .detail-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.14);
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: 42px;
+    line-height: 1.16;
+    margin-bottom: 10px;
+  }
+
+  .detail-subtitle {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 18px;
+  }
+
+  .detail-meta-row,
+  .detail-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .detail-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: 12px;
+    color: rgba(255,255,255,0.92);
+  }
+
+  .detail-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 20px;
+    border-radius: var(--radius-xl);
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .detail-banner-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .detail-banner-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .detail-banner-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 18px;
+  }
+
+  .detail-card {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    padding: 22px 24px;
+  }
+
+  .detail-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+  }
+
+  .detail-card-copy {
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .overview-list,
+  .task-list,
+  .goal-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .overview-item {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .overview-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .overview-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .overview-value {
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-primary);
+  }
+
+  .detail-quote {
+    font-family: var(--font-display);
+    font-size: 20px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+  }
+
+  .detail-quote-source {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .focus-grid,
+  .stats-grid-local {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .focus-card,
+  .stat-card-local {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 22px;
+  }
+
+  .focus-card-title,
+  .stat-label-local {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .focus-card-desc,
+  .stat-desc-local {
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .stat-value-local {
+    font-family: var(--font-display);
+    font-size: 30px;
+    line-height: 1;
+    color: var(--color-primary-dark);
+    margin-bottom: 8px;
+  }
+
+  .task-item,
+  .goal-item-local {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+  }
+
+  .task-bullet,
+  .goal-bullet {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .task-copy,
+  .goal-copy {
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .task-copy strong,
+  .goal-copy strong {
+    color: var(--text-primary);
+  }
+
+  .path-card-local {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    padding: 24px 26px 26px;
+  }
+
+  .path-track-local {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .path-step-local {
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: 16px 16px 14px;
+  }
+
+  .path-step-local.current {
+    border-color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.18);
+  }
+
+  .path-step-index {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .path-step-local.current .path-step-index {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .path-step-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .path-step-desc {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 1180px) {
+    .detail-grid,
+    .focus-grid,
+    .stats-grid-local {
+      grid-template-columns: 1fr;
+    }
+
+    .path-track-local {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 860px) {
+    .detail-hero-body {
+      padding: 28px 22px 30px;
+    }
+
+    .detail-title {
+      font-size: 32px;
+    }
+
+    .detail-banner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .path-track-local {
+      grid-template-columns: 1fr;
+    }
+
+    .overview-item {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>
+</head>
+<body class="course-detail-page">
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="detail-shell">
+        <div class="breadcrumb">
+          <a href="overview.html">课程</a>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <span id="crumb-title">课程内容</span>
+        </div>
+
+        <section class="detail-hero animate-in">
+          <div class="detail-hero-scene" id="detail-hero-scene"></div>
+          <div class="detail-hero-body">
+            <div class="detail-kicker" id="detail-kicker">课程内容页</div>
+            <h1 class="detail-title" id="detail-title">课程标题</h1>
+            <p class="detail-subtitle" id="detail-subtitle">课程简介</p>
+            <div class="detail-meta-row" id="detail-meta-row"></div>
+            <div class="detail-tag-row" id="detail-tag-row" style="margin-top:12px;"></div>
+          </div>
+        </section>
+
+        <section class="detail-banner animate-in" style="animation-delay:.05s">
+          <div class="detail-banner-copy">
+            <div class="detail-banner-title">当前已补充独立内容页</div>
+            <div class="detail-banner-desc" id="detail-banner-desc">这里提供该课程的核心内容、阅读重点与学习目标。完整多页交互流程目前仍以《荷塘月色》为演示模板。</div>
+          </div>
+          <a href="index.html" class="btn btn-primary">查看《荷塘月色》完整流程</a>
+        </section>
+
+        <section class="detail-grid">
+          <div class="detail-card animate-in" style="animation-delay:.08s">
+            <div class="detail-card-title">作品概览</div>
+            <div class="overview-list" id="overview-list"></div>
+          </div>
+
+          <div class="detail-card animate-in" style="animation-delay:.1s">
+            <div class="detail-card-title">名句摘录</div>
+            <div class="detail-quote" id="detail-quote"></div>
+            <div class="detail-quote-source" id="detail-quote-source"></div>
+          </div>
+        </section>
+
+        <section class="stats-grid-local">
+          <div class="stat-card-local animate-in" style="animation-delay:.12s">
+            <div class="stat-value-local" id="stat-1-value"></div>
+            <div class="stat-label-local" id="stat-1-label"></div>
+            <div class="stat-desc-local" id="stat-1-desc"></div>
+          </div>
+          <div class="stat-card-local animate-in" style="animation-delay:.14s">
+            <div class="stat-value-local" id="stat-2-value"></div>
+            <div class="stat-label-local" id="stat-2-label"></div>
+            <div class="stat-desc-local" id="stat-2-desc"></div>
+          </div>
+          <div class="stat-card-local animate-in" style="animation-delay:.16s">
+            <div class="stat-value-local" id="stat-3-value"></div>
+            <div class="stat-label-local" id="stat-3-label"></div>
+            <div class="stat-desc-local" id="stat-3-desc"></div>
+          </div>
+        </section>
+
+        <section class="focus-grid" id="focus-grid"></section>
+
+        <section class="detail-grid">
+          <div class="detail-card animate-in" style="animation-delay:.24s">
+            <div class="detail-card-title">内容摘要</div>
+            <div class="detail-card-copy" id="detail-summary"></div>
+          </div>
+
+          <div class="detail-card animate-in" style="animation-delay:.26s">
+            <div class="detail-card-title">阅读任务</div>
+            <div class="task-list" id="task-list"></div>
+          </div>
+        </section>
+
+        <section class="path-card-local animate-in" style="animation-delay:.3s">
+          <div class="detail-card-title">建议学习路径</div>
+          <div class="path-track-local" id="path-track-local"></div>
+        </section>
+
+        <section class="detail-card animate-in" style="animation-delay:.34s">
+          <div class="detail-card-title">本课目标</div>
+          <div class="goal-list" id="goal-list"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="shell.js"></script>
+<script src="course-content.js"></script>
+</body>
+</html>

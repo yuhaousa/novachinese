@@ -1,0 +1,17 @@
+{
+  "name": "nova-chinese",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ./scripts/prepare-static.mjs",
+    "check": "node --check ./src/worker.js && node ./scripts/prepare-static.mjs --check",
+    "cf:dev": "npm run build && wrangler dev",
+    "cf:deploy": "npm run build && wrangler deploy",
+    "cf:d1:info": "wrangler d1 info nova_chinese",
+    "cf:d1:migrate": "wrangler d1 migrations apply nova_chinese --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.4"
+  }
+}

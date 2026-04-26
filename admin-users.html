@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead Admin · 用户班级</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page">
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <div class="admin-shell">
+        <section class="admin-hero animate-in">
+          <div class="admin-hero-copy">
+            <div class="admin-kicker">后台管理模式 · 用户班级</div>
+            <h1 class="admin-hero-title">按班级查看活跃学生、课程完成度和风险提醒</h1>
+            <p class="admin-hero-subtitle">用户班级页模拟教师和教务视角，便于按班级、按课程查看学习进度、仿写提交率和 AI 对话使用情况。</p>
+          </div>
+        </section>
+
+        <section class="admin-grid-4">
+          <div class="admin-card animate-in" style="animation-delay:.05s">
+            <div class="admin-stat-value">4</div>
+            <div class="admin-stat-label">班级数</div>
+            <div class="admin-stat-desc">演示环境按 4 个班级配置，后续可扩展到年级 / 学校层级。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.08s">
+            <div class="admin-stat-value">128</div>
+            <div class="admin-stat-label">在册学生</div>
+            <div class="admin-stat-desc">每班 32 人，用于展示班级热度和完成度的聚合看板。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.11s">
+            <div class="admin-stat-value">76%</div>
+            <div class="admin-stat-label">平均完成率</div>
+            <div class="admin-stat-desc">按课程首页进入、文本解析阅读和仿写提交三项聚合。</div>
+          </div>
+          <div class="admin-card animate-in" style="animation-delay:.14s">
+            <div class="admin-stat-value">9</div>
+            <div class="admin-stat-label">风险学生</div>
+            <div class="admin-stat-desc">最近 7 天活跃下降且仿写未提交的学生数量。</div>
+          </div>
+        </section>
+
+        <section class="admin-card animate-in" style="animation-delay:.18s">
+          <div class="admin-toolbar">
+            <div class="admin-filter-row">
+              <span class="admin-filter active">全部班级</span>
+              <span class="admin-filter">初一(1)班</span>
+              <span class="admin-filter">初一(2)班</span>
+              <span class="admin-filter">初二(1)班</span>
+              <span class="admin-filter">初三(1)班</span>
+            </div>
+            <a href="#" class="admin-btn admin-btn-primary">导出班级周报</a>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>班级</th>
+                  <th>当前主推课程</th>
+                  <th>周活跃率</th>
+                  <th>文本页完成</th>
+                  <th>仿写提交</th>
+                  <th>异常人数</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>初一(1)班</td>
+                  <td>《背影》</td>
+                  <td>82%</td>
+                  <td>27 / 32</td>
+                  <td>24 / 32</td>
+                  <td><span class="admin-pill amber">2 人</span></td>
+                </tr>
+                <tr>
+                  <td>初一(2)班</td>
+                  <td>《春》</td>
+                  <td>79%</td>
+                  <td>26 / 32</td>
+                  <td>23 / 32</td>
+                  <td><span class="admin-pill amber">3 人</span></td>
+                </tr>
+                <tr>
+                  <td>初二(1)班</td>
+                  <td>《荷塘月色》</td>
+                  <td>88%</td>
+                  <td>29 / 32</td>
+                  <td>28 / 32</td>
+                  <td><span class="admin-pill green">1 人</span></td>
+                </tr>
+                <tr>
+                  <td>初三(1)班</td>
+                  <td>《岳阳楼记》</td>
+                  <td>66%</td>
+                  <td>21 / 32</td>
+                  <td>18 / 32</td>
+                  <td><span class="admin-pill rose">3 人</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-grid-2">
+          <div class="admin-card animate-in" style="animation-delay:.22s">
+            <div class="admin-card-title">教师关注名单</div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">林同学 · 初二(1)班</div>
+                  <div class="admin-list-desc">《荷塘月色》文本解析已完成，但仿写训练停留在草稿阶段 3 天。</div>
+                </div>
+                <span class="admin-pill amber">需提醒</span>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">周同学 · 初三(1)班</div>
+                  <div class="admin-list-desc">《岳阳楼记》课程页访问正常，但 AI 提问次数极低，可能需要教师干预。</div>
+                </div>
+                <span class="admin-pill rose">低参与</span>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">陈同学 · 初一(2)班</div>
+                  <div class="admin-list-desc">连续两周内容页完成度下降，建议加入班级晨读任务清单。</div>
+                </div>
+                <span class="admin-pill amber">趋势下滑</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card animate-in" style="animation-delay:.26s">
+            <div class="admin-card-title">班级动作建议</div>
+            <div class="admin-list">
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初一班级</div>
+                  <div class="admin-list-desc">建议优先推送《背影》《春》，以降低理解门槛并提高完成率。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初二班级</div>
+                  <div class="admin-list-desc">可引导进入《荷塘月色》完整流程，强化文本解析与仿写训练的联动。</div>
+                </div>
+              </div>
+              <div class="admin-list-item">
+                <div>
+                  <div class="admin-list-title">初三班级</div>
+                  <div class="admin-list-desc">建议在古文课程前增加词句预习单，降低内容页跳出率。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="admin-shell.js"></script>
+</body>
+</html>

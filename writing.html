@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>《荷塘月色》· 仿写训练</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* 顶部 hero（小尺寸） */
+  .train-hero {
+    position: relative;
+    height: 130px;
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    margin-bottom: 22px;
+    isolation: isolate;
+    box-shadow: var(--shadow-md);
+  }
+  .train-hero-bg {
+    position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse at 78% 30%, rgba(254, 240, 138, 0.35) 0%, transparent 22%),
+      linear-gradient(135deg, #0c1f3d 0%, #1a3a5c 50%, #0a1628 100%);
+  }
+  .train-hero-stars {
+    position: absolute; inset: 0; z-index: -2;
+    background-image:
+      radial-gradient(1px 1px at 12% 28%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 47% 22%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 67% 43%, rgba(255,255,255,0.3), transparent);
+  }
+  .train-hero-moon {
+    position: absolute; top: 22px; right: 25%;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff8d6, #fde68a 60%, #fcd34d);
+    box-shadow: 0 0 35px rgba(253, 230, 138, 0.5);
+    z-index: -1;
+  }
+  .train-hero-water {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 50px; z-index: -1;
+    background: linear-gradient(180deg, transparent, rgba(8, 18, 36, 0.9));
+  }
+  .train-hero-content {
+    position: relative;
+    height: 100%;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
+  }
+  .train-hero-title {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .train-hero-subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+  }
+
+  /* 主网格 */
+  .train-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  /* 左侧：仿写输入 */
+  .compose-card { padding: 22px 26px 22px; }
+  .compose-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+  }
+  .compose-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .topic-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    border: 1px solid rgba(16, 185, 129, 0.18);
+  }
+  .topic-pill em { font-style: normal; font-weight: 600; }
+
+  .compose-area {
+    width: 100%;
+    background: var(--bg-card-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 2.1;
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 280px;
+    letter-spacing: 0.5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .compose-area:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    background: #fff;
+  }
+
+  .compose-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+  }
+  .compose-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .compose-status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .save-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-primary);
+  }
+  .save-indicator svg { width: 14px; height: 14px; }
+
+  /* 右侧：AI综合评分 */
+  .score-card { padding: 22px 26px; }
+  .score-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 18px;
+  }
+  .score-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .score-ring {
+    width: 130px;
+    height: 130px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .score-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-ring-num {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .score-ring-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .score-bars {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  .score-bar-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .score-bar-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-width: 90px;
+  }
+  .score-bar-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .score-bar-icon.green { background: var(--color-primary-soft); color: var(--color-primary); }
+  .score-bar-icon.blue { background: var(--color-blue-soft); color: var(--color-blue); }
+  .score-bar-icon.purple { background: var(--color-purple-soft); color: var(--color-purple); }
+  .score-bar-icon.rose { background: #fee2e2; color: #dc2626; }
+
+  .score-bar-track {
+    height: 8px;
+    background: var(--border-soft);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--color-primary);
+    transition: width 0.6s ease;
+  }
+  .score-bar-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
+  .score-bar-fill.blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .score-bar-fill.purple { background: linear-gradient(90deg, #a78bfa, #c4b5fd); }
+  .score-bar-fill.rose { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+
+  .score-bar-num {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* AI 修改建议 */
+  .suggestion-card { padding: 18px 24px; margin-top: 0; }
+  .suggestion-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+  }
+  .suggestion-title svg { width: 16px; height: 16px; color: var(--color-primary); }
+
+  .suggestion-list {
+    list-style: none;
+    padding: 0;
+  }
+  .suggestion-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 4px 0 4px 18px;
+    position: relative;
+    line-height: 1.7;
+  }
+  .suggestion-list li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 11px;
+    width: 5px;
+    height: 5px;
+    background: var(--color-primary);
+    border-radius: 50%;
+  }
+
+  /* 优化示例 */
+  .example-card { padding: 18px 24px; }
+  .example-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+  }
+  .example-title svg { width: 16px; height: 16px; color: var(--color-primary); }
+  .example-text {
+    font-family: var(--font-display);
+    font-size: 13.5px;
+    line-height: 1.95;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
+  }
+
+  /* 与作者对话 + 一键操作 */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 18px;
+  }
+
+  .author-card { padding: 22px 26px; }
+  .author-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  .author-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .chat-bubble-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    border: 2px solid var(--border-soft);
+  }
+  .chat-avatar.user {
+    background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+    color: #9d174d;
+  }
+  .chat-avatar.author {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #fde68a;
+    font-family: var(--font-display);
+    font-size: 13px;
+  }
+  .chat-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  .chat-bubble {
+    background: var(--bg-card-soft);
+    padding: 10px 14px;
+    border-radius: 14px;
+    border-top-left-radius: 4px;
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+  .chat-bubble.from-author {
+    background: linear-gradient(135deg, #ecfdf5, #f0fdfa);
+    border-left: 3px solid var(--color-primary);
+  }
+  .chat-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .chat-author-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  /* 一键操作 */
+  .actions-card { padding: 22px 26px; }
+  .actions-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  .actions-title svg { width: 18px; height: 18px; color: var(--color-primary); }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-soft);
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+  }
+  .action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .action-icon.green { background: var(--color-primary-soft); color: var(--color-primary); }
+  .action-icon.blue { background: var(--color-blue-soft); color: var(--color-blue); }
+  .action-icon.purple { background: var(--color-purple-soft); color: var(--color-purple); }
+  .action-icon.amber { background: #fef3c7; color: #d97706; }
+  .action-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+  .action-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 1100px) {
+    .train-grid, .bottom-row { grid-template-columns: 1fr; }
+    .actions-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+
+      <!-- 标题 hero -->
+      <section class="train-hero animate-in">
+        <div class="train-hero-bg"></div>
+        <div class="train-hero-stars"></div>
+        <div class="train-hero-moon"></div>
+        <svg class="train-hero-water" viewBox="0 0 1400 50" preserveAspectRatio="none" style="position:absolute;bottom:0;left:0;right:0;z-index:-1;">
+          <path d="M0,30 Q200,15 400,25 T800,20 T1200,28 T1400,22 L1400,50 L0,50 Z" fill="#0a1830" opacity="0.7"/>
+        </svg>
+        <div class="train-hero-content">
+          <div class="train-hero-title">《荷塘月色》<span style="color:#fde68a;margin:0 6px;">·</span>仿写训练</div>
+          <div class="train-hero-subtitle">从阅读走向表达</div>
+        </div>
+      </section>
+
+      <!-- 主网格：仿写输入 + 评分 -->
+      <section class="train-grid">
+        <!-- 我的仿写 -->
+        <div class="card compose-card animate-in" style="animation-delay:.05s">
+          <div class="compose-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            我的仿写
+          </div>
+          <div class="topic-pill"><em>题目：</em>&nbsp;写一段"夜晚的校园"</div>
+          <textarea class="compose-area">夜晚的校园很安静。路灯洒下柔和的光，把小路照得淡淡的，像铺了一层白纱。操场上空无一人，只有风轻轻吹过树梢，发出沙沙的声音。远处的教学楼灯光还亮着，像一盏盏温暖的灯，照着那些仍在学习的身影。我独自走在校园的小路上，心里忽然变得很平静，好像所有的烦恼都被这夜色带走了。</textarea>
+          <div class="compose-footer">
+            <span class="compose-counter">142 / 300 字</span>
+            <div class="compose-status">
+              <span class="save-indicator">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                已自动保存
+              </span>
+              <button class="btn btn-primary" style="padding:8px 24px;">保存</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：评分 + 修改建议 + 优化示例 -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card score-card animate-in" style="animation-delay:.1s">
+            <div class="score-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
+              AI综合评分
+            </div>
+            <div class="score-row">
+              <div class="score-ring">
+                <svg viewBox="0 0 130 130">
+                  <circle cx="65" cy="65" r="55" fill="none" stroke="#e2e8f0" stroke-width="9"/>
+                  <circle cx="65" cy="65" r="55" fill="none" stroke="#10b981" stroke-width="9"
+                          stroke-dasharray="345" stroke-dashoffset="52" stroke-linecap="round"/>
+                </svg>
+                <div class="score-ring-text">
+                  <div class="score-ring-num">85</div>
+                  <div class="score-ring-label">总分</div>
+                </div>
+              </div>
+              <div class="score-bars">
+                <div class="score-bar-row">
+                  <div class="score-bar-label"><span class="score-bar-icon green">🌅</span>画面感</div>
+                  <div class="score-bar-track"><div class="score-bar-fill green" style="width:88%"></div></div>
+                  <div class="score-bar-num">88</div>
+                </div>
+                <div class="score-bar-row">
+                  <div class="score-bar-label"><span class="score-bar-icon blue">✒️</span>修辞运用</div>
+                  <div class="score-bar-track"><div class="score-bar-fill blue" style="width:84%"></div></div>
+                  <div class="score-bar-num">84</div>
+                </div>
+                <div class="score-bar-row">
+                  <div class="score-bar-label"><span class="score-bar-icon purple">📐</span>结构完整</div>
+                  <div class="score-bar-track"><div class="score-bar-fill purple" style="width:86%"></div></div>
+                  <div class="score-bar-num">86</div>
+                </div>
+                <div class="score-bar-row">
+                  <div class="score-bar-label"><span class="score-bar-icon rose">💗</span>情感表达</div>
+                  <div class="score-bar-track"><div class="score-bar-fill rose" style="width:82%"></div></div>
+                  <div class="score-bar-num">82</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card suggestion-card animate-in" style="animation-delay:.15s">
+            <div class="suggestion-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11.5l3 3L22 5"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              AI修改建议
+            </div>
+            <ul class="suggestion-list">
+              <li>增加感官细节，如气味、温度、脚步声等，增强画面感。</li>
+              <li>适当运用比喻或拟人，提升文字的表现力。</li>
+              <li>结尾可更含蓄，留一些想象空间，余味更悠长。</li>
+              <li>注意句式的长短变化，增强节奏与韵律感。</li>
+            </ul>
+          </div>
+
+          <div class="card example-card animate-in" style="animation-delay:.2s">
+            <div class="example-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+              优化示例
+            </div>
+            <div class="example-text">
+              夜色如水，校园沉静在一片温柔的光影里。路灯把小径洗得淡白，树影在风里轻轻摇晃。远处的教学楼灯火未眠，像夜空中散落的星子，守着那些仍在书写青春的人。我缓缓前行，听见自己的脚步，也听见心里慢慢沉下来的安宁。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 与作者对话 + 一键操作 -->
+      <section class="bottom-row">
+        <div class="card author-card animate-in" style="animation-delay:.25s">
+          <div class="author-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            与作者对话
+          </div>
+          <div class="chat-bubble-row">
+            <div class="chat-avatar user">林</div>
+            <div class="chat-content">
+              <div class="chat-bubble">如何把景写得更有情感？</div>
+              <span class="chat-time">11:23</span>
+            </div>
+          </div>
+          <div class="chat-bubble-row">
+            <div class="chat-avatar author">朱</div>
+            <div style="flex:1;">
+              <div class="chat-author-name">朱自清</div>
+              <div class="chat-bubble from-author">
+                写景要先在心中生情，再让景物替你说话。用感官去触摸它，让它与你有呼吸、有温度，景便不再是景，而是你心境的影子。
+              </div>
+              <span class="chat-time" style="display:block;margin-top:6px;">11:24</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card actions-card animate-in" style="animation-delay:.3s">
+          <div class="actions-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1zM14 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1z"/></svg>
+            一键操作
+          </div>
+          <div class="actions-grid">
+            <button class="action-btn">
+              <div class="action-icon green">✏️</div>
+              <div class="action-name">继续润色</div>
+              <div class="action-desc">AI进一步优化表达</div>
+            </button>
+            <button class="action-btn">
+              <div class="action-icon blue">🔊</div>
+              <div class="action-name">生成朗读稿</div>
+              <div class="action-desc">生成配乐朗读稿</div>
+            </button>
+            <button class="action-btn">
+              <div class="action-icon purple">📑</div>
+              <div class="action-name">对比范文</div>
+              <div class="action-desc">查看优秀范文对比</div>
+            </button>
+            <button class="action-btn">
+              <div class="action-icon amber">📤</div>
+              <div class="action-name">提交老师</div>
+              <div class="action-desc">提交并等待批阅</div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<script src="shell.js"></script>
+</body>
+</html>

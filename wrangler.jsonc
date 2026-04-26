@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "nova-chinese",
+  "main": "./src/worker.js",
+  "compatibility_date": "2026-04-26",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nova_chinese",
+      "database_id": "1c8a07f7-03dd-4878-9d6c-a12d8a29be53",
+      "migrations_dir": "./migrations"
+    }
+  ]
+}
