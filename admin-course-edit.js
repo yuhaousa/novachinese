@@ -84,22 +84,57 @@
   }
 
   function fillForm(item) {
-    course = item;
-    fields.slug.value = item.slug || "";
-    fields.title.value = item.title || "";
-    fields.author.value = item.author || "";
-    fields.stage.value = item.stage || item.gradeLabel || "";
-    fields.genre.value = item.genre || "";
-    fields.sourceType.value = item.sourceType || "content-page";
-    fields.route.value = item.route || "";
-    fields.status.value = item.status || "published";
-    syncCoverPreview(item.coverImageUrl || "");
-    syncCourseLinks(item);
+    const normalizedItem = {
+      ...item,
+      coverImageUrl: item.coverImageUrl || item.cover_image_url || course?.coverImageUrl || ""
+    };
+
+    course = normalizedItem;
+    fields.slug.value = normalizedItem.slug || "";
+    fields.title.value = normalizedItem.title || "";
+    fields.author.value = normalizedItem.author || "";
+    fields.stage.value = normalizedItem.stage || normalizedItem.gradeLabel || "";
+    fields.genre.value = normalizedItem.genre || "";
+    fields.sourceType.value = normalizedItem.sourceType || "content-page";
+    fields.route.value = normalizedItem.route || "";
+    fields.status.value = normalizedItem.status || "published";
+    syncCoverPreview(normalizedItem.coverImageUrl || "");
+    syncCourseLinks(normalizedItem);
 
     if (modeBadge) {
       modeBadge.textContent = "编辑模式";
       modeBadge.className = "admin-pill slate";
     }
+  }
+
+  async function uploadSelectedCover(slug) {
+    const file = coverFileInput.files?.[0];
+
+    if (!file) {
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append("slug", slug);
+    formData.append("file", file);
+
+    const response = await fetch("./api/admin/assets/upload", {
+      method: "POST",
+      body: formData
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+
+    if (selectedCoverPreviewUrl) {
+      URL.revokeObjectURL(selectedCoverPreviewUrl);
+      selectedCoverPreviewUrl = "";
+    }
+
+    coverFileInput.value = "";
+    return result.item;
   }
 
   async function loadCourse() {
@@ -193,8 +228,15 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
-      fillForm(result.item);
-      setFormStatus(`《${result.item.title}》已保存。`, "success");
+      let savedItem = result.item;
+
+      if (coverFileInput.files?.[0]) {
+        setFormStatus("课程信息已保存，正在上传并绑定封面...", "neutral");
+        savedItem = await uploadSelectedCover(savedItem.slug || slug);
+      }
+
+      fillForm(savedItem);
+      setFormStatus(`《${savedItem.title}》已保存。`, "success");
     } catch (error) {
       console.error("Failed to save course:", error);
       setFormStatus(`保存失败：${error.message}`, "error");
@@ -264,38 +306,19 @@
       return;
     }
 
-    const file = coverFileInput.files?.[0];
-
-    if (!file) {
+    if (!coverFileInput.files?.[0]) {
       setFormStatus("请选择一张封面图片。", "error");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("slug", slug);
-    formData.append("file", file);
     uploadButton.disabled = true;
     setFormStatus("正在上传封面到 R2...", "neutral");
 
     try {
-      const response = await fetch("./api/admin/assets/upload", {
-        method: "POST",
-        body: formData
-      });
-      const result = await response.json();
+      const uploadedItem = await uploadSelectedCover(slug);
 
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || `HTTP ${response.status}`);
-      }
-
-      if (selectedCoverPreviewUrl) {
-        URL.revokeObjectURL(selectedCoverPreviewUrl);
-        selectedCoverPreviewUrl = "";
-      }
-
-      coverFileInput.value = "";
-      fillForm(result.item);
-      setFormStatus(`《${result.item.title}》封面已上传。`, "success");
+      fillForm(uploadedItem);
+      setFormStatus(`《${uploadedItem.title}》封面已上传。`, "success");
     } catch (error) {
       console.error("Failed to upload cover:", error);
       setFormStatus(`上传失败：${error.message}`, "error");
