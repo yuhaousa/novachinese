@@ -163,7 +163,13 @@ function normalizeRoute(route, slug, sourceType) {
     return fallback;
   }
 
-  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  const normalizedRoute = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+
+  if (sourceType === "content-page" && /^\/course-content\.html(?:\?|$)/.test(normalizedRoute)) {
+    return `/course-content.html?course=${slug}`;
+  }
+
+  return normalizedRoute;
 }
 
 function toTextBlockValue(contentJson) {

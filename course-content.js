@@ -580,6 +580,17 @@
   }
 
   function adaptApiCourse(course) {
+    function inferScene() {
+      var title = String(course.title || "");
+      var genre = String(course.genre || "");
+
+      if (title.indexOf("春") !== -1 || genre.indexOf("写景") !== -1) return "spring";
+      if (title.indexOf("冬") !== -1) return "winter";
+      if (title.indexOf("背影") !== -1 || genre.indexOf("亲情") !== -1) return "back";
+      if (title.indexOf("桃花") !== -1) return "peach";
+      return "spring";
+    }
+
     return {
       title: "《" + course.title + "》",
       author: course.author,
@@ -626,7 +637,7 @@
         "为后续扩展文本解析、情感曲线和仿写训练打基础。",
         "保证新建课程在前台可见、可点、可继续迭代。",
       ],
-      scene: "back",
+      scene: inferScene(),
     };
   }
 

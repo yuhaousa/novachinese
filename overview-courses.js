@@ -48,6 +48,29 @@
     }
   }
 
+  function getThemeClass(course) {
+    const title = String(course.title || "");
+    const genre = String(course.genre || "");
+
+    if (title.includes("春") || genre.includes("写景")) {
+      return "course-cover-e art-spring";
+    }
+
+    if (title.includes("冬")) {
+      return "course-cover-a art-winter";
+    }
+
+    if (title.includes("背影") || genre.includes("亲情")) {
+      return "course-cover-b art-back";
+    }
+
+    if (title.includes("桃花")) {
+      return "course-cover-d art-peach";
+    }
+
+    return "course-cover-a art-lotus";
+  }
+
   function hydrateCard(card, course, index) {
     card.dataset.courseId = course.slug || course.id;
     card.style.order = String(index);
@@ -108,7 +131,7 @@
     anchor.className = "course-card animate-in";
     anchor.style.animationDelay = `${0.1 + index * 0.02}s`;
     anchor.innerHTML = `
-      <div class="course-cover" style="background: linear-gradient(135deg, #173454 0%, #0f766e 100%);">
+      <div class="course-cover ${getThemeClass(course)}">
         <div class="course-cover-top">
           <span class="course-badge">内容页课程</span>
           <span class="course-stage"></span>
