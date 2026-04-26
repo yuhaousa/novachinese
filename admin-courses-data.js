@@ -59,10 +59,16 @@
   function renderRows(items) {
     tableBody.innerHTML = items
       .map(
-        (course) => `
+        (course) => {
+          const createdAtLabel = formatDateTime(course.createdAt || course.created_at);
+
+          return `
           <tr>
-            <td>《${escapeHtml(course.title)}》</td>
-            <td>${escapeHtml(formatDateTime(course.createdAt))}</td>
+            <td>
+              <div class="admin-course-title">《${escapeHtml(course.title)}》</div>
+              <div class="admin-course-created">创建：${escapeHtml(createdAtLabel)}</div>
+            </td>
+            <td>${escapeHtml(createdAtLabel)}</td>
             <td>${escapeHtml(course.gradeLabel || course.stage || "")}</td>
             <td>${escapeHtml(course.genre)}</td>
             <td>${escapeHtml(course.pageTypeLabel)}</td>
@@ -72,7 +78,8 @@
               <a class="admin-btn admin-btn-light admin-row-action" href="admin-course-edit.html?course=${encodeURIComponent(course.slug)}">编辑</a>
             </td>
           </tr>
-        `
+        `;
+        }
       )
       .join("");
   }

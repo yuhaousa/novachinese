@@ -248,6 +248,17 @@
   color: var(--text-primary);
 }
 
+.admin-course-title {
+  font-weight: 700;
+}
+
+.admin-course-created {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .admin-table-selected td {
   background: #fff7ed;
 }
