@@ -73,9 +73,22 @@
                   <option value="draft">草稿</option>
                 </select>
               </label>
+              <label class="admin-field admin-field-span-2">
+                <span class="admin-field-label">封面图片（创建后自动上传到 R2）</span>
+                <input id="create-course-cover-file" class="admin-input" type="file" accept="image/*" />
+              </label>
             </div>
 
             <div class="admin-form-status" id="admin-course-create-status" data-tone="neutral">填写完成后点击“创建课程”。</div>
+
+            <div class="admin-cover-panel">
+              <div class="admin-cover-preview-wrap">
+                <img id="create-course-cover-preview" class="admin-cover-preview" alt="课程封面预览" />
+              </div>
+              <div class="admin-cover-actions">
+                <div class="admin-card-desc">如果这里选择了封面图，系统会先创建课程，再自动上传图片并绑定到当前课程。</div>
+              </div>
+            </div>
 
             <div class="admin-actions">
               <button type="submit" class="admin-btn admin-btn-primary" id="admin-course-create-submit">创建课程</button>

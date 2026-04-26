@@ -3,6 +3,8 @@
   const statusNode = document.getElementById("admin-course-create-status");
   const submitButton = document.getElementById("admin-course-create-submit");
   const resetButton = document.getElementById("admin-course-create-reset");
+  const coverFileInput = document.getElementById("create-course-cover-file");
+  const coverPreview = document.getElementById("create-course-cover-preview");
 
   if (!form) {
     return;
@@ -18,6 +20,22 @@
     route: document.getElementById("create-course-route"),
     status: document.getElementById("create-course-status")
   };
+
+  function syncCoverPreview(file) {
+    if (!coverPreview) {
+      return;
+    }
+
+    if (!file) {
+      coverPreview.removeAttribute("src");
+      coverPreview.style.display = "none";
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    coverPreview.src = objectUrl;
+    coverPreview.style.display = "block";
+  }
 
   function setStatus(message, tone) {
     if (!statusNode) {
@@ -51,8 +69,13 @@
     form.reset();
     fields.sourceType.value = "content-page";
     syncRoute();
+    syncCoverPreview(null);
     setStatus("表单已重置。", "neutral");
     fields.slug.focus();
+  });
+
+  coverFileInput?.addEventListener("change", () => {
+    syncCoverPreview(coverFileInput.files?.[0] || null);
   });
 
   form.addEventListener("submit", async (event) => {
@@ -89,6 +112,26 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
+      const coverFile = coverFileInput?.files?.[0] || null;
+
+      if (coverFile) {
+        setStatus(`《${result.item.title}》已创建，正在上传封面...`, "neutral");
+
+        const formData = new FormData();
+        formData.append("slug", result.item.slug);
+        formData.append("file", coverFile);
+
+        const uploadResponse = await fetch("./api/admin/assets/upload", {
+          method: "POST",
+          body: formData
+        });
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok || !uploadResult.ok) {
+          throw new Error(uploadResult.error || `HTTP ${uploadResponse.status}`);
+        }
+      }
+
       setStatus(`《${result.item.title}》已创建，正在跳转到课程编辑页...`, "success");
       location.href = `admin-course-edit.html?course=${encodeURIComponent(result.item.slug)}`;
     } catch (error) {
@@ -101,4 +144,5 @@
   });
 
   syncRoute();
+  syncCoverPreview(null);
 })();
