@@ -16,6 +16,26 @@
       .replaceAll("'", "&#39;");
   }
 
+  function formatDateTime(value) {
+    if (!value) {
+      return "—";
+    }
+
+    const date = new Date(String(value).replace(" ", "T"));
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    return new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date);
+  }
+
   function setToolbarStatus(coursePayload, dbPayload) {
     if (!statusNote) {
       return;
@@ -42,6 +62,7 @@
         (course) => `
           <tr>
             <td>《${escapeHtml(course.title)}》</td>
+            <td>${escapeHtml(formatDateTime(course.createdAt))}</td>
             <td>${escapeHtml(course.gradeLabel || course.stage || "")}</td>
             <td>${escapeHtml(course.genre)}</td>
             <td>${escapeHtml(course.pageTypeLabel)}</td>
@@ -59,7 +80,7 @@
   async function loadCourses() {
     try {
       const [coursesResponse, databaseResponse] = await Promise.all([
-        fetch("./api/admin/courses", { headers: { accept: "application/json" } }),
+        fetch("./api/admin/courses", { headers: { accept: "application/json" }, cache: "no-store" }),
         fetch("./api/db/status", { headers: { accept: "application/json" } })
       ]);
 

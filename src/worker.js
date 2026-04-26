@@ -322,6 +322,8 @@ function enrichCourse(rawCourse, source, blocks = {}) {
   return {
     ...seed,
     ...rawCourse,
+    createdAt: rawCourse.created_at || rawCourse.createdAt || "",
+    updatedAt: rawCourse.updated_at || rawCourse.updatedAt || "",
     route,
     sourceType,
     status,
@@ -419,6 +421,8 @@ async function getCourses(env) {
             c.summary,
             c.cover_image_url,
             c.status,
+            c.created_at,
+            c.updated_at,
             (
               SELECT cp.route_path
               FROM course_pages cp
@@ -455,6 +459,10 @@ async function getCourses(env) {
         const rightIndex = courseSeedOrder.get(right.slug) ?? Number.MAX_SAFE_INTEGER;
 
         if (leftIndex === rightIndex) {
+          if (leftIndex === Number.MAX_SAFE_INTEGER) {
+            return String(right.createdAt || "").localeCompare(String(left.createdAt || ""));
+          }
+
           return left.title.localeCompare(right.title, "zh-CN");
         }
 
@@ -490,6 +498,8 @@ async function getCourseRecord(env, slug) {
         c.summary,
         c.cover_image_url,
         c.status,
+        c.created_at,
+        c.updated_at,
         (
           SELECT cp.id
           FROM course_pages cp
@@ -978,12 +988,19 @@ export default {
     if (pathname === "/api/courses") {
       const courseData = await getCourses(env);
 
-      return json({
-        ok: true,
-        total: courseData.items.length,
-        dataSource: courseData.dataSource,
-        items: courseData.items
-      });
+      return json(
+        {
+          ok: true,
+          total: courseData.items.length,
+          dataSource: courseData.dataSource,
+          items: courseData.items
+        },
+        {
+          headers: {
+            "cache-control": "no-store"
+          }
+        }
+      );
     }
 
     if (pathname.startsWith("/api/course-content/")) {
@@ -1010,12 +1027,19 @@ export default {
       if (request.method === "GET") {
         const courseData = await getCourses(env);
 
-        return json({
-          ok: true,
-          total: courseData.items.length,
-          dataSource: courseData.dataSource,
-          items: courseData.items
-        });
+        return json(
+          {
+            ok: true,
+            total: courseData.items.length,
+            dataSource: courseData.dataSource,
+            items: courseData.items
+          },
+          {
+            headers: {
+              "cache-control": "no-store"
+            }
+          }
+        );
       }
 
       if (request.method === "POST") {
