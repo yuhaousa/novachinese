@@ -180,3 +180,7 @@ npm run cf:deploy
 3. 把后台课程管理做成真实可编辑
 4. 接入 Cloudflare Access 保护后台
 5. 再补 R2、AI、用户体系
+
+## CI 状态
+
+当前仓库已经接入 GitHub Actions 自动部署骨架。只要 `main` 有新的提交，`Deploy Worker` 工作流就会自动执行。
