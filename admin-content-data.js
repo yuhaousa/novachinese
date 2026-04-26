@@ -21,6 +21,7 @@
 
   let courses = [];
   let selectedSlug = "";
+  const preferredSlug = new URLSearchParams(window.location.search).get("course") || "";
 
   function setFormStatus(message, tone) {
     if (!formStatus) {
@@ -144,8 +145,13 @@
           : "当前使用静态回退数据，待 D1 连通后可持久化。"
       );
 
-      if (courses.length > 0) {
-        await loadContent(courses[0].slug);
+      const initialCourse =
+        courses.find((course) => course.slug === preferredSlug)?.slug ||
+        courses[0]?.slug;
+
+      if (initialCourse) {
+        courseSelect.value = initialCourse;
+        await loadContent(initialCourse);
       }
     } catch (error) {
       console.error("Failed to initialize content editor:", error);

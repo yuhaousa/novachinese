@@ -89,8 +89,8 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
-      setStatus(`《${result.item.title}》已创建，正在跳转到课程管理页...`, "success");
-      location.href = `admin-courses.html?course=${encodeURIComponent(result.item.slug)}`;
+      setStatus(`《${result.item.title}》已创建，正在跳转到课程编辑页...`, "success");
+      location.href = `admin-course-edit.html?course=${encodeURIComponent(result.item.slug)}`;
     } catch (error) {
       console.error("Failed to create course:", error);
       setStatus(`创建失败：${error.message}`, "error");
