@@ -15,6 +15,8 @@ const staticEntries = [
   "settings.html",
   "course-content.html",
   "course-content.js",
+  "overview-courses.js",
+  "admin-courses-data.js",
   "styles.css",
   "shell.js",
   "page-behaviors.js",

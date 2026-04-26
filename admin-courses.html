@@ -27,7 +27,7 @@
         <section class="admin-card animate-in" style="animation-delay:.06s">
           <div class="admin-toolbar">
             <div class="admin-filter-row">
-              <span class="admin-filter active">全部课程</span>
+              <span class="admin-filter active">全部课程 <strong id="admin-course-total">10</strong></span>
               <span class="admin-filter">初一</span>
               <span class="admin-filter">初二</span>
               <span class="admin-filter">初三</span>
@@ -36,6 +36,7 @@
             </div>
             <a href="#" class="admin-btn admin-btn-primary">新建课程</a>
           </div>
+          <div class="admin-note" id="admin-course-status">正在读取课程数据...</div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead>
@@ -48,7 +49,7 @@
                   <th>状态</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="admin-course-rows">
                 <tr>
                   <td>《荷塘月色》</td>
                   <td>初二</td>
@@ -111,14 +112,14 @@
                   <div class="admin-list-title">完整流程课程</div>
                   <div class="admin-list-desc">用于重点演示课程，至少包含首页、文本解析、情感曲线、仿写训练、AI 对话。</div>
                 </div>
-                <span class="admin-pill green">1 门</span>
+                <span class="admin-pill green" id="admin-full-flow-count">1 门</span>
               </div>
               <div class="admin-list-item">
                 <div>
                   <div class="admin-list-title">独立内容页课程</div>
                   <div class="admin-list-desc">用于快速扩充课程覆盖面，先承载作者、主题、名句、任务、目标和路径。</div>
                 </div>
-                <span class="admin-pill blue">9 门</span>
+                <span class="admin-pill blue" id="admin-content-page-count">9 门</span>
               </div>
               <div class="admin-list-item">
                 <div>
@@ -158,6 +159,7 @@
     </div>
   </main>
 </div>
+<script src="admin-courses-data.js"></script>
 <script src="admin-shell.js"></script>
 </body>
 </html>

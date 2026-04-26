@@ -586,7 +586,7 @@
       </section>
 
       <section class="course-toolbar animate-in" style="animation-delay:.08s">
-        <div class="course-toolbar-title"><strong>10</strong>门课程已准备展示</div>
+        <div class="course-toolbar-title"><strong id="overview-course-total">10</strong>门课程已准备展示</div>
         <div class="course-filter-row">
           <span class="course-filter-chip active">全部课程</span>
           <span class="course-filter-chip">初一</span>
@@ -597,8 +597,8 @@
         </div>
       </section>
 
-      <section class="course-grid">
-        <a href="index.html" class="course-card animate-in" style="animation-delay:.1s">
+      <section class="course-grid" id="overview-course-grid">
+        <a href="index.html" class="course-card animate-in" data-course-id="lotus" style="animation-delay:.1s">
           <div class="course-cover course-cover-a art-lotus">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -649,7 +649,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=back" class="course-card animate-in" style="animation-delay:.12s">
+        <a href="course-content.html?course=back" class="course-card animate-in" data-course-id="back" style="animation-delay:.12s">
           <div class="course-cover course-cover-b art-back">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -698,7 +698,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=baicao" class="course-card animate-in" style="animation-delay:.14s">
+        <a href="course-content.html?course=baicao" class="course-card animate-in" data-course-id="baicao" style="animation-delay:.14s">
           <div class="course-cover course-cover-c art-garden">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -746,7 +746,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=wisteria" class="course-card animate-in" style="animation-delay:.16s">
+        <a href="course-content.html?course=wisteria" class="course-card animate-in" data-course-id="wisteria" style="animation-delay:.16s">
           <div class="course-cover course-cover-d art-wisteria">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -795,7 +795,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=spring" class="course-card animate-in" style="animation-delay:.18s">
+        <a href="course-content.html?course=spring" class="course-card animate-in" data-course-id="spring" style="animation-delay:.18s">
           <div class="course-cover course-cover-e art-spring">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -840,7 +840,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=winter" class="course-card animate-in" style="animation-delay:.2s">
+        <a href="course-content.html?course=winter" class="course-card animate-in" data-course-id="winter" style="animation-delay:.2s">
           <div class="course-cover course-cover-a art-winter">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -888,7 +888,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=walk" class="course-card animate-in" style="animation-delay:.22s">
+        <a href="course-content.html?course=walk" class="course-card animate-in" data-course-id="walk" style="animation-delay:.22s">
           <div class="course-cover course-cover-b art-walk">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -937,7 +937,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=opera" class="course-card animate-in" style="animation-delay:.24s">
+        <a href="course-content.html?course=opera" class="course-card animate-in" data-course-id="opera" style="animation-delay:.24s">
           <div class="course-cover course-cover-c art-opera">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -986,7 +986,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=peach" class="course-card animate-in" style="animation-delay:.26s">
+        <a href="course-content.html?course=peach" class="course-card animate-in" data-course-id="peach" style="animation-delay:.26s">
           <div class="course-cover course-cover-d art-peach">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -1033,7 +1033,7 @@
           </div>
         </a>
 
-        <a href="course-content.html?course=tower" class="course-card animate-in" style="animation-delay:.28s">
+        <a href="course-content.html?course=tower" class="course-card animate-in" data-course-id="tower" style="animation-delay:.28s">
           <div class="course-cover course-cover-e art-tower">
             <div class="course-scene" aria-hidden="true">
               <svg viewBox="0 0 320 160" preserveAspectRatio="none">
@@ -1084,6 +1084,7 @@
     </div>
   </main>
 </div>
+<script src="overview-courses.js"></script>
 <script src="shell.js"></script>
 </body>
 </html>
