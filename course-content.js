@@ -598,6 +598,7 @@
       genre: course.genre,
       kicker: "课程内容页 · 实时内容",
       subtitle: course.subtitle || (course.genre + " · 课程内容已接入"),
+      coverImageUrl: course.coverImageUrl || course.cover_image_url || "",
       tags: Array.isArray(course.tags) ? course.tags : [],
       bannerDesc: course.summary || "本课程已接入后台内容中心，可继续补充更完整的学习资料与子页面。",
       overview: [
@@ -674,6 +675,8 @@
 
   function renderCourse(course) {
     document.title = "NovaRead AI语文 · " + course.title;
+    var hero = document.querySelector(".detail-hero");
+    var sceneNode = document.getElementById("detail-hero-scene");
 
     document.getElementById("crumb-title").textContent = course.title;
     document.getElementById("detail-kicker").textContent = course.kicker;
@@ -683,7 +686,22 @@
     document.getElementById("detail-quote").textContent = course.quote;
     document.getElementById("detail-quote-source").textContent = course.quoteSource;
     document.getElementById("detail-summary").textContent = course.summary;
-    document.getElementById("detail-hero-scene").innerHTML = sceneSvg(course.scene);
+    sceneNode.innerHTML = sceneSvg(course.scene);
+
+    if (hero && course.coverImageUrl) {
+      hero.style.backgroundImage =
+        'linear-gradient(90deg, rgba(7, 14, 26, 0.78) 0%, rgba(7, 14, 26, 0.42) 46%, rgba(7, 14, 26, 0.12) 100%), url("' +
+        course.coverImageUrl +
+        '")';
+      hero.style.backgroundSize = "cover";
+      hero.style.backgroundPosition = "center";
+      sceneNode.style.opacity = "0";
+    } else if (hero) {
+      hero.style.backgroundImage = "";
+      hero.style.backgroundSize = "";
+      hero.style.backgroundPosition = "";
+      sceneNode.style.opacity = "";
+    }
 
     document.getElementById("detail-meta-row").innerHTML = [
       course.author,

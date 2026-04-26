@@ -28,6 +28,7 @@
 
   const requestedSlug = new URLSearchParams(window.location.search).get("course") || "";
   let course = null;
+  let selectedCoverPreviewUrl = "";
 
   function setFormStatus(message, tone) {
     if (!formStatus) {
@@ -51,6 +52,22 @@
 
     coverPreview.removeAttribute("src");
     coverPreview.style.display = "none";
+  }
+
+  function previewSelectedCover(file) {
+    if (selectedCoverPreviewUrl) {
+      URL.revokeObjectURL(selectedCoverPreviewUrl);
+      selectedCoverPreviewUrl = "";
+    }
+
+    if (!file) {
+      syncCoverPreview(course?.coverImageUrl || "");
+      return;
+    }
+
+    selectedCoverPreviewUrl = URL.createObjectURL(file);
+    syncCoverPreview(selectedCoverPreviewUrl);
+    setFormStatus("已选择新的封面图片，点击“上传到 R2 并绑定课程”后才会同步到课程列表和课程页。", "neutral");
   }
 
   function syncCourseLinks(item) {
@@ -97,7 +114,8 @@
 
     try {
       const response = await fetch("./api/admin/courses", {
-        headers: { accept: "application/json" }
+        headers: { accept: "application/json" },
+        cache: "no-store"
       });
 
       if (!response.ok) {
@@ -191,8 +209,17 @@
       return;
     }
 
+    if (coverFileInput) {
+      coverFileInput.value = "";
+    }
+
+    previewSelectedCover(null);
     fillForm(course);
     setFormStatus(`已重置为《${course.title}》当前数据。`, "neutral");
+  });
+
+  coverFileInput?.addEventListener("change", () => {
+    previewSelectedCover(coverFileInput.files?.[0] || null);
   });
 
   deleteButton.addEventListener("click", async () => {
@@ -261,6 +288,12 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
+      if (selectedCoverPreviewUrl) {
+        URL.revokeObjectURL(selectedCoverPreviewUrl);
+        selectedCoverPreviewUrl = "";
+      }
+
+      coverFileInput.value = "";
       fillForm(result.item);
       setFormStatus(`《${result.item.title}》封面已上传。`, "success");
     } catch (error) {
