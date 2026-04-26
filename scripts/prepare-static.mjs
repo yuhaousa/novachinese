@@ -8,6 +8,7 @@ const checkOnly = process.argv.includes("--check");
 const staticEntries = [
   "index.html",
   "overview.html",
+  "admin-login.html",
   "text.html",
   "emotion.html",
   "writing.html",
@@ -23,9 +24,11 @@ const staticEntries = [
   "admin.html",
   "admin-courses.html",
   "admin-content.html",
+  "admin-content-data.js",
   "admin-users.html",
   "admin-ai.html",
   "admin-settings.html",
+  "admin-login.js",
   "admin.css",
   "admin-shell.js"
 ];

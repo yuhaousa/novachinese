@@ -34,7 +34,7 @@
               <span class="admin-filter">完整学习流程</span>
               <span class="admin-filter">独立内容页</span>
             </div>
-            <button type="button" class="admin-btn admin-btn-primary" disabled>新建课程（下一步）</button>
+            <button type="button" class="admin-btn admin-btn-primary" id="admin-create-course">新建课程</button>
           </div>
           <div class="admin-note" id="admin-course-status">正在读取课程数据...</div>
           <div class="admin-table-wrap">
@@ -73,7 +73,7 @@
               <div class="admin-form-grid">
                 <label class="admin-field">
                   <span class="admin-field-label">课程标识</span>
-                  <input id="course-slug" class="admin-input" type="text" readonly />
+                  <input id="course-slug" class="admin-input" type="text" />
                 </label>
                 <label class="admin-field">
                   <span class="admin-field-label">课程标题</span>
@@ -109,13 +109,28 @@
                     <option value="draft">草稿</option>
                   </select>
                 </label>
+                <label class="admin-field admin-field-span-2">
+                  <span class="admin-field-label">封面图片（R2 上传）</span>
+                  <input id="course-cover-file" class="admin-input" type="file" accept="image/*" />
+                </label>
               </div>
 
               <div class="admin-form-status" id="admin-course-form-status" data-tone="neutral">选择一门课程后即可开始编辑。</div>
 
+              <div class="admin-cover-panel">
+                <div class="admin-cover-preview-wrap">
+                  <img id="course-cover-preview" class="admin-cover-preview" alt="课程封面预览" />
+                </div>
+                <div class="admin-cover-actions">
+                  <button type="button" class="admin-btn admin-btn-light" id="admin-cover-upload">上传到 R2 并绑定课程</button>
+                  <div class="admin-card-desc">上传后会把图片写入 R2，并更新当前课程的封面地址。前台课程卡片会优先使用上传后的图片。</div>
+                </div>
+              </div>
+
               <div class="admin-actions">
                 <button type="submit" class="admin-btn admin-btn-primary" id="admin-course-save">保存到数据库</button>
                 <button type="button" class="admin-btn admin-btn-secondary" id="admin-course-reset">重置表单</button>
+                <button type="button" class="admin-btn admin-btn-danger" id="admin-course-delete">删除当前课程</button>
               </div>
             </form>
           </div>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead Admin · 登录</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page admin-login-page">
+  <main class="admin-login-shell">
+    <section class="admin-login-card">
+      <div class="admin-kicker">NovaRead Admin</div>
+      <h1 class="admin-hero-title">后台登录</h1>
+      <p class="admin-hero-subtitle">输入后台密码后才能访问课程管理、内容中心、上传和管理接口。</p>
+
+      <form id="admin-login-form" class="admin-form">
+        <label class="admin-field">
+          <span class="admin-field-label">管理员密码</span>
+          <input id="admin-login-password" class="admin-input" type="password" autocomplete="current-password" required />
+        </label>
+        <div class="admin-form-status" id="admin-login-status" data-tone="neutral">登录后会自动跳转回后台页面。</div>
+        <div class="admin-actions">
+          <button type="submit" class="admin-btn admin-btn-primary">登录后台</button>
+          <a href="index.html" class="admin-btn admin-btn-secondary">返回前台</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="admin-login.js"></script>
+</body>
+</html>

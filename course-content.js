@@ -579,10 +579,86 @@
     return items.map(renderer).join("");
   }
 
-  function getCourse() {
+  function adaptApiCourse(course) {
+    return {
+      title: "《" + course.title + "》",
+      author: course.author,
+      stage: course.stage || course.gradeLabel || "初中语文阅读",
+      genre: course.genre,
+      kicker: "课程内容页 · 实时内容",
+      subtitle: course.subtitle || (course.genre + " · 课程内容已接入"),
+      tags: Array.isArray(course.tags) ? course.tags : [],
+      bannerDesc: course.summary || "本课程已接入后台内容中心，可继续补充更完整的学习资料与子页面。",
+      overview: [
+        ["作者", course.author || "待补充"],
+        ["学段", course.stage || course.gradeLabel || "初中语文阅读"],
+        ["体裁", course.genre || "待补充"],
+        ["课程入口", course.route || "/overview.html"],
+        ["内容状态", "当前内容由后台内容中心实时提供。"],
+      ],
+      quote: course.summary || "本课程内容正在持续完善中。",
+      quoteSource: "NovaRead 内容中心",
+      stats: [
+        { value: String((course.tags || []).length || 1), label: "标签数量", desc: "用于标记本课的阅读重点与训练方向。" },
+        { value: course.sourceType === "full-flow" ? "完整" : "单页", label: "页面模式", desc: "当前课程可以配置为完整学习流程或独立内容页。" },
+        { value: course.status === "published" ? "已发布" : "草稿", label: "课程状态", desc: "由后台课程管理页控制课程上线状态。" },
+      ],
+      focuses: [
+        { title: "阅读主题", desc: course.subtitle || "可在后台内容中心继续补充课程副标题与主题说明。" },
+        { title: "课程摘要", desc: course.summary || "请在后台内容中心填写课程摘要，帮助学生快速理解学习重点。" },
+        { title: "内容扩展", desc: "后续可继续补充名句、任务、学习路径、文本解析与仿写训练。" },
+      ],
+      summary: course.summary || "当前课程已创建，但还需要继续完善摘要与深度内容块。",
+      tasks: [
+        { title: "补充课程摘要", desc: "在后台内容中心填写面向学生的课程摘要与阅读提示。" },
+        { title: "整理标签关键词", desc: "为课程补充 3-4 个高质量标签，用于目录卡片和筛选。" },
+        { title: "扩展深度内容", desc: "后续可逐步补充更多适用于该课程的阅读问题与学习目标。" },
+      ],
+      path: [
+        { name: "建档", desc: "先完成课程基础信息与入口配置。", current: false },
+        { name: "填内容", desc: "补充摘要、副标题、标签与入口文案。", current: true },
+        { name: "挂封面", desc: "上传课程封面并检查前台展示效果。", current: false },
+        { name: "扩子页", desc: "逐步扩展为完整学习流程。", current: false },
+      ],
+      goals: [
+        "让课程至少拥有可访问的独立内容页与基础内容说明。",
+        "通过后台内容中心持续完善课程摘要、标签和入口文案。",
+        "为后续扩展文本解析、情感曲线和仿写训练打基础。",
+        "保证新建课程在前台可见、可点、可继续迭代。",
+      ],
+      scene: "back",
+    };
+  }
+
+  async function getCourse() {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("course");
-    return courses[slug] || courses.back;
+
+    if (!slug) {
+      return courses.back;
+    }
+
+    if (courses[slug]) {
+      return courses[slug];
+    }
+
+    try {
+      const response = await fetch("./api/course-content/" + encodeURIComponent(slug), {
+        headers: {
+          accept: "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+
+      const payload = await response.json();
+      return adaptApiCourse(payload.item);
+    } catch (error) {
+      console.error("Failed to load dynamic course content:", error);
+      return courses.back;
+    }
   }
 
   function renderCourse(course) {
@@ -695,7 +771,7 @@
     );
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    renderCourse(getCourse());
+  document.addEventListener("DOMContentLoaded", async function () {
+    renderCourse(await getCourse());
   });
 })();

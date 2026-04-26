@@ -80,6 +80,7 @@
         </div>
         <div class="topbar-right">
           <a href="overview.html" class="topbar-vip">${icons.book}<span>查看课程站点</span></a>
+          <button type="button" class="topbar-vip topbar-logout" id="admin-logout">${icons.shield}<span>退出登录</span></button>
           <div class="topbar-user">
             <div class="topbar-user-avatar">管</div>
             <span class="topbar-user-name">管理员</span>
@@ -100,6 +101,22 @@
     const main = document.getElementById('main');
     if (main) {
       main.insertAdjacentHTML('afterbegin', buildTopbar());
+    }
+
+    const logoutButton = document.getElementById('admin-logout');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async function () {
+        try {
+          await fetch('./api/admin/logout', {
+            method: 'POST',
+            headers: { accept: 'application/json' }
+          });
+        } catch (error) {
+          console.error('Admin logout failed:', error);
+        } finally {
+          location.href = 'admin-login.html';
+        }
+      });
     }
   }
 

@@ -2,3 +2,5 @@ node_modules/
 dist/
 .wrangler/
 npm-debug.log*
+.dev.vars
+.env

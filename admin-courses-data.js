@@ -8,6 +8,11 @@
   const previewLink = document.getElementById("admin-course-preview");
   const saveButton = document.getElementById("admin-course-save");
   const resetButton = document.getElementById("admin-course-reset");
+  const deleteButton = document.getElementById("admin-course-delete");
+  const createButton = document.getElementById("admin-create-course");
+  const uploadButton = document.getElementById("admin-cover-upload");
+  const coverFileInput = document.getElementById("course-cover-file");
+  const coverPreview = document.getElementById("course-cover-preview");
   const formStatus = document.getElementById("admin-course-form-status");
 
   if (!tableBody || !form) {
@@ -27,6 +32,7 @@
 
   let courses = [];
   let selectedSlug = "";
+  let mode = "edit";
 
   function escapeHtml(value) {
     return String(value)
@@ -44,6 +50,36 @@
 
     formStatus.textContent = message;
     formStatus.dataset.tone = tone || "neutral";
+  }
+
+  function syncCoverPreview(url) {
+    if (!coverPreview) {
+      return;
+    }
+
+    if (url) {
+      coverPreview.src = url;
+      coverPreview.style.display = "block";
+      return;
+    }
+
+    coverPreview.removeAttribute("src");
+    coverPreview.style.display = "none";
+  }
+
+  function syncPreviewLink(course) {
+    if (!previewLink) {
+      return;
+    }
+
+    if (!course) {
+      previewLink.href = "overview.html";
+      previewLink.textContent = "预览课程内容页";
+      return;
+    }
+
+    previewLink.href = course.route;
+    previewLink.textContent = `预览《${course.title}》`;
   }
 
   function setToolbarStatus(coursePayload, dbPayload) {
@@ -85,7 +121,7 @@
         (course) => `
           <tr data-course-slug="${escapeHtml(course.slug)}" ${course.slug === selectedSlug ? 'class="admin-table-selected"' : ""}>
             <td>《${escapeHtml(course.title)}》</td>
-            <td>${escapeHtml(course.stage || course.gradeLabel || "")}</td>
+            <td>${escapeHtml(course.gradeLabel || course.stage || "")}</td>
             <td>${escapeHtml(course.genre)}</td>
             <td>${escapeHtml(course.pageTypeLabel)}</td>
             <td><code>${escapeHtml(course.route)}</code></td>
@@ -101,13 +137,23 @@
       .join("");
   }
 
-  function syncPreviewLink(course) {
-    if (!previewLink || !course) {
-      return;
-    }
+  function getCourseBySlug(slug) {
+    return courses.find((course) => course.slug === slug) || null;
+  }
 
-    previewLink.href = course.route;
-    previewLink.textContent = `预览《${course.title}》`;
+  function toggleEditMode(editMode) {
+    mode = editMode ? "edit" : "create";
+    fields.slug.readOnly = editMode;
+    deleteButton.disabled = !editMode;
+
+    if (!editMode) {
+      syncCoverPreview("");
+      syncPreviewLink(null);
+      coverFileInput.value = "";
+      uploadButton.disabled = true;
+    } else {
+      uploadButton.disabled = false;
+    }
   }
 
   function fillForm(course) {
@@ -115,21 +161,34 @@
       return;
     }
 
+    toggleEditMode(true);
     selectedSlug = course.slug;
     fields.slug.value = course.slug;
     fields.title.value = course.title || "";
     fields.author.value = course.author || "";
-    fields.stage.value = course.stage || "";
+    fields.stage.value = course.stage || course.gradeLabel || "";
     fields.genre.value = course.genre || "";
     fields.sourceType.value = course.sourceType || "content-page";
     fields.route.value = course.route || "";
     fields.status.value = course.status || "published";
     syncPreviewLink(course);
+    syncCoverPreview(course.coverImageUrl || "");
     renderRows(courses);
   }
 
-  function getCourseBySlug(slug) {
-    return courses.find((course) => course.slug === slug) || null;
+  function blankCreateForm() {
+    toggleEditMode(false);
+    selectedSlug = "";
+    fields.slug.value = "";
+    fields.title.value = "";
+    fields.author.value = "";
+    fields.stage.value = "";
+    fields.genre.value = "";
+    fields.sourceType.value = "content-page";
+    fields.route.value = "";
+    fields.status.value = "published";
+    renderRows(courses);
+    setFormStatus("请输入新课程信息，然后保存。", "neutral");
   }
 
   async function loadCourses(preferredSlug) {
@@ -156,15 +215,15 @@
         courses[0] ||
         null;
 
-      selectedSlug = nextCourse?.slug || "";
-      renderRows(courses);
+      if (mode === "create" && !preferredSlug) {
+        renderRows(courses);
+        return;
+      }
 
       if (nextCourse) {
         fillForm(nextCourse);
-      }
-
-      if (!nextCourse) {
-        setFormStatus("当前没有可编辑课程。", "neutral");
+      } else {
+        blankCreateForm();
       }
     } catch (error) {
       console.error("Failed to load admin courses:", error);
@@ -191,6 +250,10 @@
     }
   });
 
+  createButton.addEventListener("click", () => {
+    blankCreateForm();
+  });
+
   fields.sourceType.addEventListener("change", () => {
     if (fields.sourceType.value === "full-flow" && !fields.route.value.trim()) {
       fields.route.value = "/index.html";
@@ -200,7 +263,13 @@
       fields.sourceType.value === "content-page" &&
       (!fields.route.value.trim() || fields.route.value.trim() === "/index.html")
     ) {
-      fields.route.value = `/course-content.html?course=${fields.slug.value}`;
+      fields.route.value = `/course-content.html?course=${fields.slug.value || "new-course"}`;
+    }
+  });
+
+  fields.slug.addEventListener("input", () => {
+    if (mode === "create" && fields.sourceType.value === "content-page") {
+      fields.route.value = `/course-content.html?course=${fields.slug.value || "new-course"}`;
     }
   });
 
@@ -210,11 +279,12 @@
     const slug = fields.slug.value.trim();
 
     if (!slug) {
-      setFormStatus("请先选择课程。", "error");
+      setFormStatus("请填写课程标识。", "error");
       return;
     }
 
     const payload = {
+      slug,
       title: fields.title.value,
       author: fields.author.value,
       stage: fields.stage.value,
@@ -226,10 +296,14 @@
 
     saveButton.disabled = true;
     resetButton.disabled = true;
-    setFormStatus("正在保存到 D1...", "neutral");
+    setFormStatus(mode === "create" ? "正在创建课程..." : "正在保存到 D1...", "neutral");
 
     try {
-      const response = await fetch(`./api/admin/courses/${encodeURIComponent(slug)}`, {
+      const endpoint =
+        mode === "create"
+          ? "./api/admin/courses"
+          : `./api/admin/courses/${encodeURIComponent(selectedSlug)}`;
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -244,8 +318,13 @@
         throw new Error(result.error || `HTTP ${response.status}`);
       }
 
-      setFormStatus(`《${result.item.title}》已保存。`, "success");
-      await loadCourses(slug);
+      setFormStatus(
+        mode === "create"
+          ? `《${result.item.title}》已创建。`
+          : `《${result.item.title}》已保存。`,
+        "success"
+      );
+      await loadCourses(result.item.slug);
     } catch (error) {
       console.error("Failed to save course:", error);
       setFormStatus(`保存失败：${error.message}`, "error");
@@ -256,11 +335,101 @@
   });
 
   resetButton.addEventListener("click", () => {
+    if (mode === "create") {
+      blankCreateForm();
+      return;
+    }
+
     const course = getCourseBySlug(selectedSlug);
 
     if (course) {
       fillForm(course);
       setFormStatus(`已重置为《${course.title}》当前数据。`, "neutral");
+    }
+  });
+
+  deleteButton.addEventListener("click", async () => {
+    if (mode !== "edit" || !selectedSlug) {
+      setFormStatus("请先选择要删除的课程。", "error");
+      return;
+    }
+
+    const course = getCourseBySlug(selectedSlug);
+
+    if (!course) {
+      return;
+    }
+
+    const confirmed = window.confirm(`确认删除《${course.title}》吗？此操作会删除课程配置和内容块。`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteButton.disabled = true;
+    setFormStatus(`正在删除《${course.title}》...`, "neutral");
+
+    try {
+      const response = await fetch(`./api/admin/courses/${encodeURIComponent(selectedSlug)}`, {
+        method: "DELETE",
+        headers: {
+          accept: "application/json"
+        }
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
+
+      setFormStatus(`《${course.title}》已删除。`, "success");
+      await loadCourses();
+    } catch (error) {
+      console.error("Failed to delete course:", error);
+      setFormStatus(`删除失败：${error.message}`, "error");
+    } finally {
+      deleteButton.disabled = false;
+    }
+  });
+
+  uploadButton.addEventListener("click", async () => {
+    if (mode !== "edit" || !selectedSlug) {
+      setFormStatus("请先保存课程，再上传封面。", "error");
+      return;
+    }
+
+    const file = coverFileInput.files?.[0];
+
+    if (!file) {
+      setFormStatus("请选择一张封面图片。", "error");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("slug", selectedSlug);
+    formData.append("file", file);
+    uploadButton.disabled = true;
+    setFormStatus("正在上传封面到 R2...", "neutral");
+
+    try {
+      const response = await fetch("./api/admin/assets/upload", {
+        method: "POST",
+        body: formData
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
+
+      syncCoverPreview(result.item.coverImageUrl);
+      setFormStatus(`《${result.item.title}》封面已上传。`, "success");
+      await loadCourses(result.item.slug);
+    } catch (error) {
+      console.error("Failed to upload cover:", error);
+      setFormStatus(`上传失败：${error.message}`, "error");
+    } finally {
+      uploadButton.disabled = false;
     }
   });
 

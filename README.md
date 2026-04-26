@@ -68,6 +68,13 @@ NovaChinese/
 - `/api/health`
 - `/api/courses`
 - `/api/db/status`
+- `/api/course-content/:slug`
+- `/api/admin/login`
+- `/api/admin/logout`
+- `/api/admin/courses`
+- `/api/admin/courses/:slug`
+- `/api/admin/content/:slug`
+- `/api/admin/assets/upload`
 
 当前线上地址：
 
@@ -130,6 +137,35 @@ npm run cf:deploy
 1. 本地改代码
 2. `git push origin main`
 3. GitHub Actions 自动部署到 Cloudflare
+
+## 后台登录与封面上传
+
+当前后台已经具备：
+
+- 管理页登录保护
+- 课程创建、编辑、删除
+- 内容块编辑
+- R2 封面上传
+
+Cloudflare 侧当前依赖：
+
+- D1：`nova_chinese`
+- R2：`nova-chinese-assets`
+- Worker secrets：
+  - `ADMIN_PASSWORD`
+  - `ADMIN_SESSION_SECRET`
+
+如果后续需要更换后台密码，可执行：
+
+```bash
+npx wrangler secret put ADMIN_PASSWORD
+```
+
+如果需要更换会话签名密钥，可执行：
+
+```bash
+npx wrangler secret put ADMIN_SESSION_SECRET
+```
 
 ## D1 数据库接入
 
