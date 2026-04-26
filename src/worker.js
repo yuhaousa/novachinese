@@ -148,6 +148,10 @@ function safeSlug(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function generateCourseSlug() {
+  return `course-${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 6)}`;
+}
+
 function normalizeRoute(route, slug, sourceType) {
   const fallback =
     sourceType === "full-flow"
@@ -217,7 +221,8 @@ function normalizeAdminPayload(slug, body, isCreate = false) {
     return { error: "Request body must be valid JSON." };
   }
 
-  const normalizedSlug = safeSlug(isCreate ? body.slug : slug);
+  const requestedSlug = isCreate ? body.slug : slug;
+  const normalizedSlug = safeSlug(requestedSlug) || (isCreate ? generateCourseSlug() : "");
   const title = typeof body.title === "string" ? body.title.trim() : "";
   const author = typeof body.author === "string" ? body.author.trim() : "";
   const stage = typeof body.stage === "string" ? body.stage.trim() : "";
