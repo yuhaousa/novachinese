@@ -59,7 +59,8 @@
     </svg>`;
 
   function getPath() {
-    return location.pathname.split("/").pop() || "index.html";
+    const path = location.pathname.split("/").pop() || "index.html";
+    return path.includes(".") ? path : path + ".html";
   }
 
   function isCourseLearningPath(path) {
@@ -223,25 +224,16 @@
       return;
     }
 
+    const main = document.getElementById("main") || document.querySelector(".main");
     const content = document.querySelector("#main > .content") || document.querySelector(".main .content");
 
-    if (!content || content.dataset.courseSubnavMounted === "true") {
+    if (!main || !content || main.dataset.courseSubnavMounted === "true") {
       return;
     }
 
-    const body = document.createElement("div");
-    body.className = "course-learning-body";
-
-    while (content.firstChild) {
-      body.appendChild(content.firstChild);
-    }
-
-    const layout = document.createElement("div");
-    layout.className = "course-learning-layout";
-    layout.insertAdjacentHTML("afterbegin", buildCourseSubnav());
-    layout.appendChild(body);
-    content.appendChild(layout);
-    content.dataset.courseSubnavMounted = "true";
+    main.classList.add("has-course-subnav");
+    content.insertAdjacentHTML("beforebegin", buildCourseSubnav());
+    main.dataset.courseSubnavMounted = "true";
     refreshCourseSubnavTitle();
   }
 
