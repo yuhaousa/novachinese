@@ -5,6 +5,9 @@ const textEncoder = new TextEncoder();
 
 const ADMIN_COOKIE_NAME = "nova_admin_session";
 const ADMIN_SESSION_MAX_AGE = 60 * 60 * 12;
+const USER_COOKIE_NAME = "nova_user_session";
+const USER_SESSION_MAX_AGE = 60 * 60 * 24 * 30;
+const PASSWORD_HASH_ITERATIONS = 100000;
 const PUBLIC_BLOCK_KEYS = ["subtitle", "tags", "entryLabel", "entryValue"];
 
 function json(data, init = {}) {
@@ -82,9 +85,75 @@ async function signValue(value, secret) {
   return bytesToBase64Url(new Uint8Array(signature));
 }
 
+async function hashPassword(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    textEncoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      hash: "SHA-256",
+      salt,
+      iterations: PASSWORD_HASH_ITERATIONS
+    },
+    passwordKey,
+    256
+  );
+
+  return [
+    "pbkdf2-sha256",
+    String(PASSWORD_HASH_ITERATIONS),
+    bytesToBase64Url(salt),
+    bytesToBase64Url(new Uint8Array(bits))
+  ].join("$");
+}
+
+async function verifyPassword(password, storedHash) {
+  const parts = String(storedHash || "").split("$");
+
+  if (parts.length !== 4 || parts[0] !== "pbkdf2-sha256") {
+    return false;
+  }
+
+  const iterations = Number(parts[1]);
+  const salt = base64UrlToBytes(parts[2]);
+  const expectedHash = parts[3];
+
+  if (!Number.isInteger(iterations) || iterations < 10000 || !expectedHash) {
+    return false;
+  }
+
+  const passwordKey = await crypto.subtle.importKey(
+    "raw",
+    textEncoder.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      hash: "SHA-256",
+      salt,
+      iterations
+    },
+    passwordKey,
+    256
+  );
+  const actualHash = bytesToBase64Url(new Uint8Array(bits));
+
+  return actualHash === expectedHash;
+}
+
 async function createAdminSession(secret, username = "admin") {
   const payload = {
     username,
+    type: "admin",
     expiresAt: Date.now() + ADMIN_SESSION_MAX_AGE * 1000
   };
   const encodedPayload = bytesToBase64Url(textEncoder.encode(JSON.stringify(payload)));
@@ -92,29 +161,52 @@ async function createAdminSession(secret, username = "admin") {
   return `${encodedPayload}.${signature}`;
 }
 
-async function verifyAdminSession(token, secret) {
+async function verifySignedSession(token, secret) {
   if (!token || !secret || !token.includes(".")) {
-    return false;
+    return null;
   }
 
   const [encodedPayload, providedSignature] = token.split(".");
 
   if (!encodedPayload || !providedSignature) {
-    return false;
+    return null;
   }
 
   const expectedSignature = await signValue(encodedPayload, secret);
 
   if (expectedSignature !== providedSignature) {
-    return false;
+    return null;
   }
 
   try {
     const payload = JSON.parse(new TextDecoder().decode(base64UrlToBytes(encodedPayload)));
-    return typeof payload.expiresAt === "number" && payload.expiresAt > Date.now();
+    return typeof payload.expiresAt === "number" && payload.expiresAt > Date.now()
+      ? payload
+      : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+async function verifyAdminSession(token, secret) {
+  const payload = await verifySignedSession(token, secret);
+  return payload?.type === "admin" || payload?.username === "admin";
+}
+
+async function createUserSession(secret, userId) {
+  const payload = {
+    type: "user",
+    userId,
+    expiresAt: Date.now() + USER_SESSION_MAX_AGE * 1000
+  };
+  const encodedPayload = bytesToBase64Url(textEncoder.encode(JSON.stringify(payload)));
+  const signature = await signValue(encodedPayload, secret);
+  return `${encodedPayload}.${signature}`;
+}
+
+async function verifyUserSession(token, secret) {
+  const payload = await verifySignedSession(token, secret);
+  return payload?.type === "user" && payload.userId ? payload : null;
 }
 
 function buildSessionCookie(token) {
@@ -123,6 +215,14 @@ function buildSessionCookie(token) {
 
 function buildExpiredSessionCookie() {
   return `${ADMIN_COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
+}
+
+function buildUserSessionCookie(token) {
+  return `${USER_COOKIE_NAME}=${token}; Max-Age=${USER_SESSION_MAX_AGE}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+}
+
+function buildExpiredUserSessionCookie() {
+  return `${USER_COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 }
 
 function isAdminPagePath(pathname) {
@@ -145,6 +245,14 @@ function safeSlug(value) {
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function generateCourseSlug() {
@@ -904,6 +1012,173 @@ function normalizeUser(row) {
   };
 }
 
+function serializePublicUser(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    email: row.email || "",
+    displayName: row.display_name || "",
+    role: row.role || "student",
+    schoolName: row.school_name || "",
+    loginCount: Number(row.login_count || 0),
+    lastLoginAt: row.last_login_at || "",
+    createdAt: row.created_at || "",
+    status: row.status || "active"
+  };
+}
+
+async function getUserByEmail(env, email) {
+  return env.DB.prepare(
+    `
+      SELECT
+        id,
+        email,
+        display_name,
+        role,
+        school_name,
+        password_hash,
+        login_count,
+        last_login_at,
+        status,
+        created_at,
+        updated_at
+      FROM users
+      WHERE email = ?
+      LIMIT 1
+    `
+  )
+    .bind(email)
+    .first();
+}
+
+async function getUserById(env, userId) {
+  return env.DB.prepare(
+    `
+      SELECT
+        id,
+        email,
+        display_name,
+        role,
+        school_name,
+        login_count,
+        last_login_at,
+        status,
+        created_at,
+        updated_at
+      FROM users
+      WHERE id = ?
+      LIMIT 1
+    `
+  )
+    .bind(userId)
+    .first();
+}
+
+async function updateUserLoginMetrics(env, userId) {
+  await env.DB.prepare(
+    `
+      UPDATE users
+      SET
+        login_count = COALESCE(login_count, 0) + 1,
+        last_login_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `
+  )
+    .bind(userId)
+    .run();
+}
+
+async function registerUser(env, body, secret) {
+  const email = normalizeEmail(body?.email);
+  const displayName = String(body?.displayName || "").trim();
+  const password = String(body?.password || "");
+  const schoolName = String(body?.schoolName || "").trim();
+
+  if (!isValidEmail(email)) {
+    return { error: "请输入有效邮箱。", status: 400 };
+  }
+
+  if (!displayName) {
+    return { error: "请输入用户姓名。", status: 400 };
+  }
+
+  if (password.length < 8) {
+    return { error: "密码至少需要 8 位。", status: 400 };
+  }
+
+  const existing = await getUserByEmail(env, email);
+
+  if (existing) {
+    return { error: "该邮箱已注册，请直接登录。", status: 409 };
+  }
+
+  const userId = `user-${crypto.randomUUID()}`;
+  const passwordHash = await hashPassword(password);
+
+  await env.DB.prepare(
+    `
+      INSERT INTO users (
+        id,
+        email,
+        display_name,
+        role,
+        school_name,
+        password_hash,
+        login_count,
+        last_login_at,
+        status,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, 'student', ?, ?, 1, CURRENT_TIMESTAMP, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `
+  )
+    .bind(userId, email, displayName, schoolName || null, passwordHash)
+    .run();
+
+  const user = await getUserById(env, userId);
+  const token = await createUserSession(secret, userId);
+
+  return {
+    item: serializePublicUser(user),
+    token
+  };
+}
+
+async function loginUser(env, body, secret) {
+  const email = normalizeEmail(body?.email);
+  const password = String(body?.password || "");
+
+  if (!isValidEmail(email) || !password) {
+    return { error: "邮箱或密码不正确。", status: 401 };
+  }
+
+  const user = await getUserByEmail(env, email);
+  const passwordOk = await verifyPassword(password, user?.password_hash);
+
+  if (!user || !passwordOk) {
+    return { error: "邮箱或密码不正确。", status: 401 };
+  }
+
+  if (user.status === "disabled") {
+    return { error: "该账号已被禁用。", status: 403 };
+  }
+
+  await updateUserLoginMetrics(env, user.id);
+
+  const updatedUser = await getUserById(env, user.id);
+  const token = await createUserSession(secret, user.id);
+
+  return {
+    item: serializePublicUser(updatedUser),
+    token
+  };
+}
+
 async function getAdminUsers(env) {
   const columnInfo = await env.DB.prepare("PRAGMA table_info(users)").all();
   const columns = new Set(
@@ -1019,9 +1294,107 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const { pathname } = url;
+    const userSessionSecret = env.USER_SESSION_SECRET || env.ADMIN_SESSION_SECRET;
 
     if (pathname.startsWith("/uploads/")) {
       return serveUpload(env, pathname);
+    }
+
+    if (pathname === "/api/auth/register") {
+      if (!env.DB) {
+        return errorResponse(503, "D1 is not configured for user accounts.");
+      }
+
+      if (!userSessionSecret) {
+        return errorResponse(503, "User session secret is not configured.");
+      }
+
+      if (request.method !== "POST") {
+        return errorResponse(405, "Method not allowed.");
+      }
+
+      const result = await registerUser(env, await readJson(request), userSessionSecret);
+
+      if (result.error) {
+        return errorResponse(result.status || 500, result.error);
+      }
+
+      return json(
+        {
+          ok: true,
+          item: result.item
+        },
+        {
+          headers: {
+            "set-cookie": buildUserSessionCookie(result.token)
+          }
+        }
+      );
+    }
+
+    if (pathname === "/api/auth/login") {
+      if (!env.DB) {
+        return errorResponse(503, "D1 is not configured for user accounts.");
+      }
+
+      if (!userSessionSecret) {
+        return errorResponse(503, "User session secret is not configured.");
+      }
+
+      if (request.method !== "POST") {
+        return errorResponse(405, "Method not allowed.");
+      }
+
+      const result = await loginUser(env, await readJson(request), userSessionSecret);
+
+      if (result.error) {
+        return errorResponse(result.status || 500, result.error);
+      }
+
+      return json(
+        {
+          ok: true,
+          item: result.item
+        },
+        {
+          headers: {
+            "set-cookie": buildUserSessionCookie(result.token)
+          }
+        }
+      );
+    }
+
+    if (pathname === "/api/auth/logout") {
+      return json(
+        { ok: true },
+        {
+          headers: {
+            "set-cookie": buildExpiredUserSessionCookie()
+          }
+        }
+      );
+    }
+
+    if (pathname === "/api/auth/me") {
+      if (!env.DB || !userSessionSecret) {
+        return json({ ok: true, item: null });
+      }
+
+      const cookies = parseCookies(request.headers.get("cookie"));
+      const session = await verifyUserSession(cookies[USER_COOKIE_NAME], userSessionSecret);
+      const user = session?.userId ? await getUserById(env, session.userId) : null;
+
+      return json(
+        {
+          ok: true,
+          item: user && user.status !== "disabled" ? serializePublicUser(user) : null
+        },
+        {
+          headers: {
+            "cache-control": "no-store"
+          }
+        }
+      );
     }
 
     if (pathname === "/api/admin/login") {

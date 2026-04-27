@@ -126,6 +126,15 @@
     return course ? href + "?course=" + encodeURIComponent(course) : href;
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   function buildSidebar() {
     const activeId = getActiveId();
     const settingsActive = activeId === "settings";
@@ -211,15 +220,78 @@
         </div>
         <div class="topbar-right">
           <a href="admin.html" class="topbar-vip">${icons.shield}<span>后台管理</span></a>
-          <button class="topbar-vip">${icons.crown}<span>会员中心</span></button>
+          <a href="user-auth.html?mode=register" class="topbar-vip" id="user-auth-entry">${icons.crown}<span>登录/注册</span></a>
+          <button class="topbar-vip" id="user-logout" type="button" style="display:none;">${icons.shield}<span>退出登录</span></button>
           <button class="topbar-icon-btn" aria-label="通知">${icons.bell}<span class="badge"></span></button>
-          <div class="topbar-user">
-            <div class="topbar-user-avatar">林</div>
-            <span class="topbar-user-name">林同学</span>
+          <a class="topbar-user" id="topbar-user-link" href="user-auth.html">
+            <div class="topbar-user-avatar" id="topbar-user-avatar">未</div>
+            <span class="topbar-user-name" id="topbar-user-name">未登录</span>
             ${icons.chevron.replace("viewBox", 'class="topbar-user-chevron" viewBox')}
-          </div>
+          </a>
         </div>
       </header>`;
+  }
+
+  async function refreshUserSession() {
+    const entry = document.getElementById("user-auth-entry");
+    const logout = document.getElementById("user-logout");
+    const userLink = document.getElementById("topbar-user-link");
+    const userName = document.getElementById("topbar-user-name");
+    const userAvatar = document.getElementById("topbar-user-avatar");
+
+    if (!entry || !userName || !userAvatar) {
+      return;
+    }
+
+    try {
+      const response = await fetch("./api/auth/me", {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+      const payload = response.ok ? await response.json() : null;
+      const user = payload?.item;
+
+      if (!user) {
+        entry.style.display = "";
+        if (logout) logout.style.display = "none";
+        if (userLink) userLink.href = "user-auth.html";
+        userName.textContent = "未登录";
+        userAvatar.textContent = "未";
+        return;
+      }
+
+      const displayName = user.displayName || user.email || "用户";
+      entry.style.display = "none";
+      if (logout) logout.style.display = "";
+      if (userLink) userLink.href = "learning.html";
+      userName.textContent = displayName;
+      userAvatar.textContent = displayName.slice(0, 1);
+    } catch (error) {
+      console.error("Failed to refresh user session:", error);
+    }
+  }
+
+  function wireUserLogout() {
+    const logout = document.getElementById("user-logout");
+
+    if (!logout) {
+      return;
+    }
+
+    logout.addEventListener("click", async function () {
+      logout.disabled = true;
+
+      try {
+        await fetch("./api/auth/logout", {
+          method: "POST",
+          headers: { accept: "application/json" }
+        });
+      } catch (error) {
+        console.error("User logout failed:", error);
+      } finally {
+        location.href = "user-auth.html";
+      }
+    });
   }
 
   function mountCourseSubnav() {
@@ -268,6 +340,8 @@
       main.insertAdjacentHTML("afterbegin", buildTopbar());
     }
 
+    wireUserLogout();
+    refreshUserSession();
     scheduleCourseSubnavMount();
   }
 
