@@ -7,8 +7,8 @@
   ];
 
   const courseNavItems = [
-    { id: "content", icon: "book", label: "课程内容", href: "course-content.html", desc: "资料与概览" },
     { id: "home", icon: "home", label: "课程首页", href: "index.html", desc: "目标与入口" },
+    { id: "content", icon: "book", label: "课程内容", href: "course-content.html", desc: "资料与概览" },
     { id: "text", icon: "file", label: "文本分析", href: "text.html", desc: "精读与意境" },
     { id: "emotion", icon: "activity", label: "情感曲线", href: "emotion.html", desc: "结构与情绪" },
     { id: "writing", icon: "edit", label: "仿写训练", href: "writing.html", desc: "迁移表达" },

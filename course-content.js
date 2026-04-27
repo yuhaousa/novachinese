@@ -8,7 +8,7 @@
       kicker: "课程内容页 · 亲情叙事",
       subtitle: "从一次送别、一趟买橘子的背影里，读懂中国散文里最克制也最深沉的父爱。",
       tags: ["细节描写", "父子亲情", "叙事节奏", "情感留白"],
-      bannerDesc: "本页补充了《背影》的独立内容梳理，包括作品背景、阅读重点、学习路径和名句摘录。当前完整交互流程仍以《荷塘月色》为演示模板。",
+      bannerDesc: "本页补充了《背影》的独立内容梳理，包括作品背景、阅读重点、学习路径和名句摘录。",
       overview: [
         ["作者", "朱自清，现代散文家、诗人，以语言清润、情感真挚见长。"],
         ["时代背景", "写于家庭变故与社会动荡之后，文字中带有浓重的个人记忆色彩。"],
@@ -642,6 +642,33 @@
     };
   }
 
+  function mergeApiCourse(apiItem, baseCourse) {
+    const liveCourse = adaptApiCourse(apiItem);
+
+    if (!baseCourse) {
+      return liveCourse;
+    }
+
+    return {
+      ...baseCourse,
+      title: liveCourse.title || baseCourse.title,
+      author: liveCourse.author || baseCourse.author,
+      stage: liveCourse.stage || baseCourse.stage,
+      genre: liveCourse.genre || baseCourse.genre,
+      subtitle: apiItem.subtitle || baseCourse.subtitle,
+      tags: Array.isArray(apiItem.tags) && apiItem.tags.length ? apiItem.tags : baseCourse.tags,
+      coverImageUrl: liveCourse.coverImageUrl || baseCourse.coverImageUrl || "",
+      route: apiItem.route || baseCourse.route || "",
+      slug: apiItem.slug || baseCourse.slug || "",
+      status: apiItem.status || baseCourse.status,
+      sourceType: apiItem.sourceType || apiItem.source_type || baseCourse.sourceType
+    };
+  }
+
+  function plainTitle(title) {
+    return String(title || "当前课程").replace(/^《|》$/g, "");
+  }
+
   async function getCourse() {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("course");
@@ -650,15 +677,12 @@
       return courses.back;
     }
 
-    if (courses[slug]) {
-      return courses[slug];
-    }
-
     try {
       const response = await fetch("./api/course-content/" + encodeURIComponent(slug), {
         headers: {
           accept: "application/json"
-        }
+        },
+        cache: "no-store"
       });
 
       if (!response.ok) {
@@ -666,9 +690,12 @@
       }
 
       const payload = await response.json();
-      return adaptApiCourse(payload.item);
+      return mergeApiCourse(payload.item, courses[slug]);
     } catch (error) {
       console.error("Failed to load dynamic course content:", error);
+      if (courses[slug]) {
+        return courses[slug];
+      }
       return courses.back;
     }
   }
@@ -677,6 +704,8 @@
     document.title = "NovaRead AI语文 · " + course.title;
     var hero = document.querySelector(".detail-hero");
     var sceneNode = document.getElementById("detail-hero-scene");
+    var flowLink = document.getElementById("detail-flow-link");
+    var courseSlug = course.slug || new URLSearchParams(window.location.search).get("course") || "";
 
     document.getElementById("crumb-title").textContent = course.title;
     document.getElementById("detail-kicker").textContent = course.kicker;
@@ -687,6 +716,11 @@
     document.getElementById("detail-quote-source").textContent = course.quoteSource;
     document.getElementById("detail-summary").textContent = course.summary;
     sceneNode.innerHTML = sceneSvg(course.scene);
+
+    if (flowLink) {
+      flowLink.href = courseSlug ? "index.html?course=" + encodeURIComponent(courseSlug) : "index.html";
+      flowLink.textContent = "进入《" + plainTitle(course.title) + "》课程首页";
+    }
 
     if (hero && course.coverImageUrl) {
       hero.style.backgroundImage =
