@@ -67,7 +67,7 @@
 
     selectedCoverPreviewUrl = URL.createObjectURL(file);
     syncCoverPreview(selectedCoverPreviewUrl);
-    setFormStatus("已选择新的封面图片，点击“上传到 R2 并绑定课程”后才会同步到课程列表和课程页。", "neutral");
+    setFormStatus("已选择新的封面图片。", "neutral");
   }
 
   function syncCourseLinks(item) {

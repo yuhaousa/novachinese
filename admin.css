@@ -411,9 +411,10 @@
 
 .admin-cover-panel {
   display: grid;
-  grid-template-columns: 180px 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(0, 360px);
+  gap: 12px;
   align-items: start;
+  width: min(100%, 360px);
   padding: 14px;
   border-radius: 14px;
   background: var(--bg-card-soft);
@@ -437,7 +438,11 @@
 
 .admin-cover-actions {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+}
+
+.admin-cover-file {
+  min-height: 44px;
 }
 
 .admin-login-page {

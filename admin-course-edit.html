@@ -73,10 +73,6 @@
                   <option value="draft">草稿</option>
                 </select>
               </label>
-              <label class="admin-field admin-field-span-2">
-                <span class="admin-field-label">封面图片（R2 上传）</span>
-                <input id="course-cover-file" class="admin-input" type="file" accept="image/*" />
-              </label>
             </div>
 
             <div class="admin-form-status" id="admin-course-form-status" data-tone="neutral">正在读取课程数据...</div>
@@ -86,8 +82,8 @@
                 <img id="course-cover-preview" class="admin-cover-preview" alt="课程封面预览" />
               </div>
               <div class="admin-cover-actions">
-                <button type="button" class="admin-btn admin-btn-light" id="admin-cover-upload">上传到 R2 并绑定课程</button>
-                <div class="admin-card-desc">上传后会把图片写入 R2，并更新当前课程的封面地址。前台课程卡片会优先使用上传后的图片。</div>
+                <input id="course-cover-file" class="admin-input admin-cover-file" type="file" accept="image/*" />
+                <button type="button" class="admin-btn admin-btn-light" id="admin-cover-upload">上传封面</button>
               </div>
             </div>
 
