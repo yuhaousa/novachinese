@@ -223,7 +223,7 @@
       return;
     }
 
-    const content = document.querySelector(".main > .content");
+    const content = document.querySelector("#main > .content") || document.querySelector(".main .content");
 
     if (!content || content.dataset.courseSubnavMounted === "true") {
       return;
@@ -245,10 +245,25 @@
     refreshCourseSubnavTitle();
   }
 
+  function scheduleCourseSubnavMount() {
+    mountCourseSubnav();
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mountCourseSubnav, { once: true });
+    }
+
+    requestAnimationFrame(mountCourseSubnav);
+    window.setTimeout(mountCourseSubnav, 80);
+    window.addEventListener("load", mountCourseSubnav, { once: true });
+  }
+
   function mountShell() {
     const app = document.getElementById("app");
     if (!app) return;
-    if (app.dataset.shellMounted === "true") return;
+    if (app.dataset.shellMounted === "true") {
+      scheduleCourseSubnavMount();
+      return;
+    }
 
     app.insertAdjacentHTML("afterbegin", buildSidebar());
     app.dataset.shellMounted = "true";
@@ -258,7 +273,7 @@
       main.insertAdjacentHTML("afterbegin", buildTopbar());
     }
 
-    mountCourseSubnav();
+    scheduleCourseSubnavMount();
   }
 
   if (document.getElementById("app")) {
