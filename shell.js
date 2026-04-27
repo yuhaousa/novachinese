@@ -6,6 +6,7 @@
   ];
 
   const courseNavItems = [
+    { id: "content", icon: "book", label: "课程内容", href: "course-content.html", desc: "资料与概览" },
     { id: "home", icon: "home", label: "课程首页", href: "index.html", desc: "目标与入口" },
     { id: "text", icon: "file", label: "文本分析", href: "text.html", desc: "精读与意境" },
     { id: "emotion", icon: "activity", label: "情感曲线", href: "emotion.html", desc: "结构与情绪" },
@@ -62,7 +63,7 @@
   }
 
   function isCourseLearningPath(path) {
-    return ["index.html", "text.html", "emotion.html", "writing.html", "chat.html", ""].includes(path);
+    return ["course-content.html", "index.html", "text.html", "emotion.html", "writing.html", "chat.html", ""].includes(path);
   }
 
   function getActiveId() {
@@ -74,6 +75,7 @@
 
   function getCourseActiveId() {
     const path = getPath();
+    if (path === "course-content.html") return "content";
     if (path === "index.html" || path === "") return "home";
     if (path === "text.html") return "text";
     if (path === "emotion.html") return "emotion";
@@ -84,7 +86,35 @@
 
   function getCourseTitle() {
     const match = document.title.match(/《(.+?)》/);
-    return match ? match[1] : "荷塘月色";
+    return match ? match[1] : "当前课程";
+  }
+
+  async function refreshCourseSubnavTitle() {
+    const course = new URLSearchParams(location.search).get("course");
+    const titleNode = document.querySelector(".course-subnav-title");
+
+    if (!course || !titleNode) {
+      return;
+    }
+
+    try {
+      const response = await fetch("./api/course-content/" + encodeURIComponent(course), {
+        headers: { accept: "application/json" },
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = await response.json();
+
+      if (payload?.item?.title) {
+        titleNode.textContent = "《" + payload.item.title + "》";
+      }
+    } catch (error) {
+      console.error("Failed to refresh course subnav title:", error);
+    }
   }
 
   function withCurrentCourseQuery(href) {
@@ -212,6 +242,7 @@
     layout.appendChild(body);
     content.appendChild(layout);
     content.dataset.courseSubnavMounted = "true";
+    refreshCourseSubnavTitle();
   }
 
   function mountShell() {
