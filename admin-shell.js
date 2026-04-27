@@ -4,7 +4,7 @@
     { id: 'dashboard', icon: 'grid', label: '管理看板', href: 'admin.html' },
     { id: 'courses', icon: 'book', label: '课程管理', href: 'admin-courses.html' },
     { id: 'content', icon: 'file', label: '内容中心', href: 'admin-content.html' },
-    { id: 'users', icon: 'users', label: '用户班级', href: 'admin-users.html' },
+    { id: 'users', icon: 'users', label: '用户管理', href: 'admin-users.html' },
     { id: 'ai', icon: 'activity', label: 'AI策略', href: 'admin-ai.html' },
     { id: 'settings', icon: 'settings', label: '后台设置', href: 'admin-settings.html' },
   ];

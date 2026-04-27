@@ -5,7 +5,7 @@
   const path = rawPath.includes(".") ? rawPath : rawPath + ".html";
 
   const moduleLabels = {
-    "index.html": "AI教学",
+    "index.html": "",
     "text.html": "精读与内容理解",
     "emotion.html": "结构分析与情感曲线",
     "writing.html": "仿写训练",
@@ -256,7 +256,7 @@
     const theme = inferTheme(course);
     text(".hero-vertical-title", course.title);
     text(".hero-stamp", course.author || "AI");
-    html(".hero-content h1", "<em>《" + escapeHtml(course.title) + "》</em>" + escapeHtml(moduleLabels[path]));
+    html(".hero-content h1", "<em>《" + escapeHtml(course.title) + "》</em>" + escapeHtml(moduleLabels[path] || ""));
     text(".hero-subtitle", course.subtitle || course.summary || "把一篇课文升级为可互动的阅读训练系统");
 
     const featureCards = $$(".feature-card");

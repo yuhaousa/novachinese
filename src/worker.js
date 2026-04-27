@@ -887,6 +887,112 @@ async function uploadCourseCover(env, request) {
   };
 }
 
+function normalizeUser(row) {
+  return {
+    id: row.id,
+    email: row.email || "",
+    displayName: row.display_name || "",
+    role: row.role || "student",
+    schoolName: row.school_name || "",
+    className: row.class_name || "",
+    loginCount: Number(row.login_count || 0),
+    lastLoginAt: row.last_login_at || "",
+    createdAt: row.created_at || "",
+    updatedAt: row.updated_at || "",
+    status: row.status || "active",
+    statusLabel: row.status === "disabled" ? "禁用" : "正常"
+  };
+}
+
+async function getAdminUsers(env) {
+  const columnInfo = await env.DB.prepare("PRAGMA table_info(users)").all();
+  const columns = new Set(
+    (Array.isArray(columnInfo.results) ? columnInfo.results : []).map((column) => column.name)
+  );
+  const loginCountExpression = columns.has("login_count")
+    ? "COALESCE(u.login_count, 0)"
+    : `COALESCE((
+        SELECT COUNT(*)
+        FROM audit_logs al
+        WHERE al.actor_user_id = u.id
+          AND al.action IN ('login', 'user.login', 'admin.login')
+      ), 0)`;
+  const lastLoginExpression = columns.has("last_login_at")
+    ? "u.last_login_at"
+    : `(
+        SELECT MAX(al.created_at)
+        FROM audit_logs al
+        WHERE al.actor_user_id = u.id
+          AND al.action IN ('login', 'user.login', 'admin.login')
+      )`;
+  const statusExpression = columns.has("status") ? "COALESCE(u.status, 'active')" : "'active'";
+
+  const result = await env.DB.prepare(
+    `
+      SELECT
+        u.id,
+        u.email,
+        u.display_name,
+        u.role,
+        u.school_name,
+        u.created_at,
+        u.updated_at,
+        ${loginCountExpression} AS login_count,
+        ${lastLoginExpression} AS last_login_at,
+        ${statusExpression} AS status,
+        (
+          SELECT c.name
+          FROM class_members cm
+          JOIN classes c ON c.id = cm.class_id
+          WHERE cm.user_id = u.id
+          ORDER BY cm.created_at DESC
+          LIMIT 1
+        ) AS class_name
+      FROM users u
+      ORDER BY
+        CASE WHEN last_login_at IS NULL OR last_login_at = '' THEN 1 ELSE 0 END,
+        last_login_at DESC,
+        u.created_at DESC
+    `
+  ).all();
+
+  const items = (Array.isArray(result.results) ? result.results : []).map(normalizeUser);
+  const now = Date.now();
+  const activeWindowMs = 30 * 24 * 60 * 60 * 1000;
+  const stats = items.reduce(
+    (accumulator, user) => {
+      accumulator.total += 1;
+      accumulator.loginTotal += user.loginCount;
+
+      if (user.role === "student") {
+        accumulator.students += 1;
+      }
+
+      const lastLoginTime = user.lastLoginAt
+        ? new Date(String(user.lastLoginAt).replace(" ", "T")).getTime()
+        : NaN;
+
+      if (!Number.isNaN(lastLoginTime) && now - lastLoginTime <= activeWindowMs) {
+        accumulator.activeLast30Days += 1;
+      }
+
+      return accumulator;
+    },
+    {
+      total: 0,
+      students: 0,
+      activeLast30Days: 0,
+      loginTotal: 0
+    }
+  );
+
+  return {
+    dataSource: "d1",
+    items,
+    stats
+  };
+}
+
 async function serveUpload(env, pathname) {
   if (!env.COURSE_ASSETS) {
     return new Response("Not found", { status: 404 });
@@ -1060,6 +1166,33 @@ export default {
       }
 
       return errorResponse(405, "Method not allowed.");
+    }
+
+    if (pathname === "/api/admin/users") {
+      if (!env.DB) {
+        return errorResponse(503, "D1 is not configured for user management.");
+      }
+
+      if (request.method !== "GET") {
+        return errorResponse(405, "Method not allowed.");
+      }
+
+      const userData = await getAdminUsers(env);
+
+      return json(
+        {
+          ok: true,
+          total: userData.items.length,
+          dataSource: userData.dataSource,
+          stats: userData.stats,
+          items: userData.items
+        },
+        {
+          headers: {
+            "cache-control": "no-store"
+          }
+        }
+      );
     }
 
     if (pathname.startsWith("/api/admin/courses/")) {

@@ -33,6 +33,7 @@ const staticEntries = [
   "admin-course-create.js",
   "admin-course-edit.js",
   "admin-users.html",
+  "admin-users-data.js",
   "admin-ai.html",
   "admin-settings.html",
   "admin-login.js",
