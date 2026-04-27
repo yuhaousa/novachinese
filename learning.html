@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NovaRead AI语文 · 我的学习</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .learning-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  .learning-main-card {
+    border-radius: var(--radius-2xl);
+    padding: 30px;
+    min-height: 240px;
+    background:
+      radial-gradient(circle at 78% 18%, rgba(16,185,129,.22), transparent 32%),
+      linear-gradient(135deg, #071426 0%, #10203a 54%, #12352d 100%);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .learning-main-card::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    bottom: -80px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    border: 42px solid rgba(255,255,255,.06);
+  }
+  .learning-kicker {
+    color: #6ee7b7;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .learning-title {
+    font-family: var(--font-display);
+    font-size: 34px;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .learning-subtitle {
+    color: rgba(255,255,255,.72);
+    font-size: 15px;
+    line-height: 1.8;
+    max-width: 660px;
+    position: relative;
+    z-index: 1;
+  }
+  .learning-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .learning-stat {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .learning-stat-label {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .learning-stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .learning-stat-value small {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-left: 3px;
+    font-family: var(--font-body);
+  }
+  .learning-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 18px;
+    align-items: start;
+  }
+  .learning-card {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+  }
+  .learning-section-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .learning-section-title span {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .recent-course {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, #fff, #fbfdff);
+  }
+  .recent-cover {
+    width: 88px;
+    height: 68px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #d1fae5, #eef2ff);
+    display: grid;
+    place-items: center;
+    color: var(--color-primary-dark);
+    font-family: var(--font-display);
+    font-weight: 800;
+    overflow: hidden;
+  }
+  .recent-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .recent-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+  .recent-meta {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .recent-progress {
+    margin-top: 10px;
+    height: 7px;
+    border-radius: 99px;
+    background: #e2e8f0;
+    overflow: hidden;
+  }
+  .recent-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-primary), #22d3ee);
+  }
+  .recent-action {
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .timeline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 12px;
+  }
+  .timeline-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+  }
+  .timeline-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .timeline-meta {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  @media (max-width: 1100px) {
+    .learning-hero,
+    .learning-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <main class="main" id="main">
+    <div class="content">
+      <section class="learning-hero">
+        <div class="learning-main-card animate-in">
+          <div class="learning-kicker">My Learning</div>
+          <h1 class="learning-title">我的学习</h1>
+          <p class="learning-subtitle">查看最近学习的课程、累计学习时间、完成进度和下一步建议。这里先基于课程数据生成学习概览，后续可以接入真实用户学习记录。</p>
+        </div>
+        <div class="learning-stats animate-in" style="animation-delay:.06s">
+          <div class="learning-stat">
+            <div class="learning-stat-label">累计学习时间</div>
+            <div class="learning-stat-value" id="total-minutes">0<small>min</small></div>
+          </div>
+          <div class="learning-stat">
+            <div class="learning-stat-label">近期课程</div>
+            <div class="learning-stat-value" id="recent-count">0<small>门</small></div>
+          </div>
+          <div class="learning-stat">
+            <div class="learning-stat-label">平均完成度</div>
+            <div class="learning-stat-value" id="avg-progress">0<small>%</small></div>
+          </div>
+          <div class="learning-stat">
+            <div class="learning-stat-label">连续学习</div>
+            <div class="learning-stat-value">4<small>天</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="learning-grid">
+        <div class="learning-card animate-in" style="animation-delay:.1s">
+          <div class="learning-section-title">近期学习课程 <span>按最近学习排序</span></div>
+          <div class="recent-list" id="recent-course-list"></div>
+        </div>
+        <aside class="learning-card animate-in" style="animation-delay:.15s">
+          <div class="learning-section-title">学习动态 <span>本周</span></div>
+          <div class="timeline-list" id="learning-timeline"></div>
+        </aside>
+      </section>
+    </div>
+  </main>
+</div>
+<script src="shell.js?v=20260427-learning1"></script>
+<script src="learning.js?v=20260427-learning1"></script>
+</body>
+</html>

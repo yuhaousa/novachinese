@@ -5,7 +5,7 @@
   const path = rawPath.includes(".") ? rawPath : rawPath + ".html";
 
   const moduleLabels = {
-    "index.html": "AI教学 Demo",
+    "index.html": "AI教学",
     "text.html": "精读与内容理解",
     "emotion.html": "结构分析与情感曲线",
     "writing.html": "仿写训练",
@@ -124,6 +124,53 @@
       ["体裁", course.genre || "阅读文本"],
       ["主题", course.subtitle || course.summary || "围绕本课内容进行阅读理解与表达训练。"]
     ];
+  }
+
+  function getChatPartners(course) {
+    const title = String(course.title || "");
+    const author = course.author || "作者";
+    const partners = [
+      { name: author, desc: "本课作者", active: true }
+    ];
+
+    function add(name, desc) {
+      if (!name || partners.some((item) => item.name === name)) {
+        return;
+      }
+
+      partners.push({ name, desc, active: false });
+    }
+
+    if (/背影/.test(title)) {
+      add("父亲", "文中核心人物");
+      add("我", "文章叙述者");
+    } else if (/散步/.test(title)) {
+      add("母亲", "文中人物");
+      add("妻子", "文中人物");
+      add("儿子", "文中人物");
+      add("我", "文章叙述者");
+    } else if (/百草园|三味书屋/.test(title)) {
+      add("童年的我", "文章叙述者");
+      add("寿镜吾先生", "三味书屋先生");
+      add("长妈妈", "回忆中的人物");
+    } else if (/社戏/.test(title)) {
+      add("迅哥儿", "文章叙述者");
+      add("双喜", "文中伙伴");
+      add("阿发", "文中伙伴");
+    } else if (/桃花源/.test(title)) {
+      add("渔人", "文中人物");
+      add("桃花源中人", "文中群像");
+    } else if (/岳阳楼/.test(title)) {
+      add("滕子京", "文章相关人物");
+      add("古仁人", "文中理想人格");
+    } else if (/皇帝|新装/.test(title)) {
+      add("皇帝", "文中人物");
+      add("小孩", "文中人物");
+    } else if (/春|济南|紫藤萝|荷塘|月色/.test(title)) {
+      add("我", "文章叙述者");
+    }
+
+    return partners;
   }
 
   function setLessonReady() {
@@ -363,8 +410,26 @@
 
   function applyChat(course) {
     const author = course.author || "作者";
+    const partners = getChatPartners(course);
     html(".page-title", "AI 对话<span class=\"accent\">·</span>与" + escapeHtml(author) + "对谈");
-    text(".page-subtitle", "围绕《" + course.title + "》提问，理解作者、文本和表达方法。");
+    text(".page-subtitle", "围绕《" + course.title + "》与作者、文中人物对话，理解文本和表达方法。");
+    const chatSide = $(".chat-side");
+
+    if (chatSide) {
+      const partnerHtml = partners
+        .map((partner) => {
+          const avatar = escapeHtml(partner.name.slice(0, 1));
+          return "<div class=\"persona " + (partner.active ? "active" : "") + "\"><div class=\"persona-avatar zhu\">" + avatar + "</div><div class=\"persona-info\"><div class=\"persona-name\">" + escapeHtml(partner.name) + "</div><div class=\"persona-desc\">" + escapeHtml(partner.desc) + "</div></div>" + (partner.active ? "<div class=\"persona-status\"></div>" : "") + "</div>";
+        })
+        .join("");
+
+      chatSide.innerHTML =
+        "<div class=\"chat-side-head\"><div class=\"chat-side-title\">对话伙伴</div><div class=\"chat-side-sub\">仅显示本课作者与文中人物</div></div>" +
+        "<div class=\"chat-side-section\"><div class=\"chat-side-section-label\">本课相关</div><div class=\"persona-list\">" + partnerHtml + "</div></div>" +
+        "<div class=\"chat-side-section\" style=\"flex:1;overflow:hidden;display:flex;flex-direction:column;\"><div class=\"chat-side-section-label\">最近对话</div><div class=\"history-list\" style=\"overflow-y:auto;\"><div class=\"history-item active\"><div class=\"history-title\">《" + escapeHtml(course.title) + "》阅读重点</div><div class=\"history-time\">刚刚 · " + escapeHtml(author) + "</div></div><div class=\"history-item\"><div class=\"history-title\">作者与人物关系</div><div class=\"history-time\">昨天 · " + escapeHtml(author) + "</div></div></div></div>" +
+        "<div class=\"chat-side-foot\"><button class=\"new-chat-btn\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg>新建对话</button></div>";
+    }
+
     text(".persona-name", author);
     $$(".history-time").forEach((node) => {
       node.textContent = node.textContent.replace(/朱自清/g, author);
