@@ -126,6 +126,38 @@
     ];
   }
 
+  function setLessonReady() {
+    document.documentElement.classList.remove("lesson-course-loading");
+  }
+
+  function applySceneCard(course, theme) {
+    const sceneImage = $(".scene-image");
+    const keywordWrap = $(".scene-keywords");
+    const tabs = $$(".scene-tab");
+    const tags = courseTags(course);
+
+    if (tabs.length >= 3) {
+      tabs[0].textContent = "课程场景";
+      tabs[1].textContent = "阅读线索";
+      tabs[2].textContent = "关键词";
+    }
+
+    if (sceneImage) {
+      sceneImage.innerHTML = course.coverImageUrl
+        ? "<img src=\"" + escapeHtml(course.coverImageUrl) + "\" alt=\"" + escapeHtml(course.title) + "\" style=\"width:100%;height:100%;object-fit:cover;display:block;\" />" +
+          "<div style=\"position:absolute;inset:0;background:linear-gradient(135deg,rgba(7,14,26,.2),rgba(7,14,26,.62));\"></div>" +
+          "<div style=\"position:absolute;left:28px;bottom:24px;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.35);\"><div style=\"font-size:15px;opacity:.82;margin-bottom:8px;\">" + escapeHtml(theme.scene) + "</div><div style=\"font-family:var(--font-display);font-size:32px;font-weight:800;\">《" + escapeHtml(course.title) + "》</div><div style=\"margin-top:8px;font-size:14px;opacity:.9;\">" + escapeHtml(course.author || course.genre || "课程阅读") + "</div></div>"
+        : "<div style=\"height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ecfdf5,#eef2ff);\"><div style=\"text-align:center;padding:24px;\"><div style=\"font-size:64px;margin-bottom:16px;\">" + escapeHtml(theme.image) + "</div><div style=\"font-family:var(--font-display);font-size:32px;font-weight:800;color:#0f172a;\">《" + escapeHtml(course.title) + "》</div><div style=\"margin-top:10px;color:#475569;\">" + escapeHtml(theme.scene + " · " + theme.method) + "</div></div></div>";
+    }
+
+    if (keywordWrap) {
+      keywordWrap.innerHTML = tags
+        .slice(0, 4)
+        .map((tag) => "<span class=\"keyword-chip\">" + escapeHtml(tag) + "</span>")
+        .join("");
+    }
+  }
+
   function preserveCourseQuery() {
     if (!slug) {
       return;
@@ -208,6 +240,7 @@
     const tags = courseTags(course);
 
     html(".page-title", "《" + escapeHtml(course.title) + "》<span class=\"accent\">·</span>精读与内容理解");
+    applySceneCard(course, theme);
     const readingCard = $(".reading-card");
 
     if (readingCard) {
@@ -291,6 +324,18 @@
 
     text(".emotion-tooltip", "在《" + course.title + "》核心段落处\n观察情感变化");
     text(".ai-summary-text", parts.join("。") + "。");
+
+    $$(".emotion-svg text").forEach((node) => {
+      if (/荷塘月色/.test(node.textContent)) {
+        node.textContent = course.title;
+      } else if (/月色/.test(node.textContent)) {
+        node.textContent = tags[0] || theme.scene;
+      } else if (/宁静/.test(node.textContent)) {
+        node.textContent = theme.mood;
+      } else if (/超脱/.test(node.textContent)) {
+        node.textContent = tags[1] || theme.method;
+      }
+    });
   }
 
   function applyWriting(course) {
@@ -332,10 +377,28 @@
     $$(".msg-avatar.bot, .chat-header-avatar").forEach((node) => {
       node.textContent = author.slice(0, 1);
     });
-    const firstMessage = $(".chat-stream .msg:not(.from-user) .msg-bubble.bot");
-    if (firstMessage) {
-      firstMessage.innerHTML = "你好，林同学。我们现在一起阅读《" + escapeHtml(course.title) + "》。你可以问我作品内容、作者情感、写作手法，或把你不理解的句子发给我。<br/>" + escapeHtml(course.summary || course.subtitle || "");
+
+    const stream = $(".chat-stream");
+    if (stream) {
+      stream.innerHTML =
+        "<div class=\"msg-divider\">今天 11:18</div>" +
+        "<div class=\"msg\"><div class=\"msg-avatar bot\">" + escapeHtml(author.slice(0, 1)) + "</div><div class=\"msg-body\"><div class=\"msg-name\">" + escapeHtml(author) + "</div><div class=\"msg-bubble bot\">你好，林同学。我们现在一起阅读《" + escapeHtml(course.title) + "》。你可以问我作品内容、作者情感、写作手法，或把你不理解的句子发给我。<br/>" + escapeHtml(course.summary || course.subtitle || "这节课会围绕文本内容、结构和表达方法展开。") + "</div><div class=\"msg-time\">11:18</div></div></div>" +
+        "<div class=\"msg from-user\"><div class=\"msg-avatar user\">林</div><div class=\"msg-body\"><div class=\"msg-name\">林同学</div><div class=\"msg-bubble user\">这篇《" + escapeHtml(course.title) + "》最重要的阅读重点是什么？</div><div class=\"msg-time\">11:21</div></div></div>" +
+        "<div class=\"msg\"><div class=\"msg-avatar bot\">" + escapeHtml(author.slice(0, 1)) + "</div><div class=\"msg-body\"><div class=\"msg-name\">" + escapeHtml(author) + "</div><div class=\"msg-bubble bot\">可以先抓住三个问题：文本写了什么，作者为什么这样写，以及这些写法如何服务主题。<div class=\"msg-quote\">" + escapeHtml(course.genre || "文本解读") + " · " + escapeHtml((course.summary || course.subtitle || course.title).slice(0, 80)) + "</div>接下来可以继续追问具体段落、关键词或写作方法。</div><div class=\"msg-time\">11:22</div></div></div>";
     }
+
+    const suggestList = $(".suggest-list");
+    if (suggestList) {
+      suggestList.innerHTML = [
+        "《" + course.title + "》的核心主题是什么？",
+        "这篇课文最值得学习的表达方法是什么？",
+        "作者" + author + "想表达怎样的情感？",
+        "我应该怎样做仿写练习？"
+      ].map((item) => "<button class=\"suggest-item\"><span class=\"ico\">💡</span>" + escapeHtml(item) + "</button>").join("");
+    }
+
+    text(".context-text", course.summary || course.subtitle || "围绕本课文本进行提问。");
+
     const input = $(".chat-input-area");
     if (input) {
       input.setAttribute("placeholder", "向" + author + "提问，或粘贴一句你想讨论的原文…");
@@ -361,6 +424,7 @@
     preserveCourseQuery();
 
     if (!slug || !["index.html", "text.html", "emotion.html", "writing.html", "chat.html"].includes(path)) {
+      setLessonReady();
       return;
     }
 
@@ -368,6 +432,8 @@
       applyCourse(await loadCourse());
     } catch (error) {
       console.error("Failed to apply selected course data:", error);
+    } finally {
+      setLessonReady();
     }
   });
 })();
